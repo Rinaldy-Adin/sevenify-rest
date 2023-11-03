@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "commonjs",
+        "outDir": "dist",
+        "rootDir": "src",
+        "strict": true,
+        "esModuleInterop": true,
+        "baseUrl": "./",
+        "paths": {
+            "@/*": ["./src/*"]
+        },
+        "typeRoots": [
+            "./node_modules/@types/**/index.d.ts",
+            "src/ts/**/*.d.ts"
+        ],
+        "moduleResolution": "Node",
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
+        "pretty": true
+    },
+    "include": ["./src/**/*"],
+    "exclude": ["node_modules"]
+}
