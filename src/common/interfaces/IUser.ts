@@ -1,6 +1,6 @@
-export interface IUser {
-    id: number;
-    name: string;
+export interface IUserJWT {
+    username: string;
+    phpSessId: string;
 }
 
 export interface IUserDAO {

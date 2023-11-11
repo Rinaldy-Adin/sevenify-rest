@@ -1,10 +1,12 @@
 import phpClient from '@/clients/phpClient';
 import AppError from '@/common/AppError';
 import { ContentType } from '@/common/enums';
-import { IUser, IUserDAO, IUserPHPRespDTO } from '@/common/interfaces/IUser';
+import { IUserDAO, IUserPHPRespDTO } from '@/common/interfaces/IUser';
 import config from '@/config';
 import { createUser, getUserByName } from '@/repositories/userRepository';
 import { logger } from '@/utils/logger';
+import { AxiosError } from 'axios';
+import { StatusCodes } from 'http-status-codes';
 import jwt from 'jsonwebtoken';
 
 export const signIn = async (username: string, password: string) => {
@@ -25,7 +27,7 @@ export const signIn = async (username: string, password: string) => {
             const createUserData = {
                 user_name: phpLoginData.user_name,
                 user_premium: false,
-                role: phpLoginData.role
+                role: phpLoginData.role,
             };
             logger.info(phpLoginData);
             userRecord = await createUser(createUserData);
@@ -49,14 +51,26 @@ export const signIn = async (username: string, password: string) => {
             throw new AppError();
         }
     } catch (error) {
-        logger.error(error);
+        if (
+            error instanceof AxiosError && error.response?.status == 401
+        ) {
+            throw new AppError(
+                StatusCodes.UNAUTHORIZED,
+                'Incorrect username or password'
+            );
+        } else if (error instanceof AppError) {
+            throw error;
+        }
         throw new AppError();
     }
 
-    const accessToken = jwt.sign({
-        username: userRecord.user_name,
-        phpSessId: phpSessionId
-    }, config.jwtSecret)
+    const accessToken = jwt.sign(
+        {
+            username: userRecord.user_name,
+            phpSessId: phpSessionId,
+        },
+        config.jwtSecret
+    );
 
-    return {user: userRecord, token: accessToken};
+    return { user: userRecord, token: accessToken };
 };

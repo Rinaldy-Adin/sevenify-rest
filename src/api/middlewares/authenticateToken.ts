@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import AppError from '@/common/AppError';
 import { StatusCodes } from 'http-status-codes';
-import { IUser } from '@/common/interfaces/IUser';
+import { IUserJWT } from '@/common/interfaces/IUser';
 
 export default function authenticateToken(
     req: Request,
@@ -19,7 +19,7 @@ export default function authenticateToken(
     }
 
     try {
-        req.user = jwt.verify(token, config.jwtSecret) as IUser;
+        req.user = jwt.verify(token, config.jwtSecret) as IUserJWT;
         return next();
     } catch (error) {
         const appErr = new AppError(StatusCodes.FORBIDDEN);
