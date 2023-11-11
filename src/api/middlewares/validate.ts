@@ -14,32 +14,20 @@ export function validateBody(schema: AnyZodObject) {
             return next();
         } catch (err) {
             if (err instanceof ZodError)
-                return next(new AppError(StatusCodes.BAD_REQUEST, err.issues[0].message));
+                return next(
+                    new AppError(StatusCodes.BAD_REQUEST, err.issues[0].message)
+                );
             return next(err);
         }
     };
 }
 
-const validateItemBody = validateBody(
+export const validatePendingAction = validateBody(
     z.object({
         body: z.object({
-            perusahaan_id: z
-                .string({ required_error: 'perusahaan_id required' })
-                .min(1, { message: 'perusahaan_id cannot be empty' }),
-            nama: z
-                .string({ required_error: 'nama required' })
-                .min(1, { message: 'nama cannot be empty' }),
-            harga: z
-                .number({ required_error: 'harga required' })
-                .int({ message: 'harga must be a round number' })
-                .gt(0, 'harga must be bigger than 0'),
-            stok: z
-                .number({ required_error: 'stok required' })
-                .int({ message: 'stok must be a round number' })
-                .gt(0, 'stok must be bigger than 0'),
-            kode: z
-                .string({ required_error: 'kode required' })
-                .min(1, { message: 'kode cannot be empty' }),
+            action: z.enum(['accept', 'reject'], {
+                required_error: 'action required',
+            }),
         }),
     })
 );
@@ -62,5 +50,3 @@ const validatePerusahaanBody = validateBody(
         }),
     })
 );
-
-export { validateItemBody, validatePerusahaanBody };

@@ -14,6 +14,23 @@ export async function getAllUsers() {
     return await prisma.users.findMany();
 }
 
+export async function getPendingUserById(userId: number) {
+    return await prisma.users.findUnique({
+        where: {
+            user_premium: false,
+            user_id: userId,
+        },
+    });
+}
+
+export async function getPendingUsers() {
+    return await prisma.users.findMany({
+        where: {
+            user_premium: false,
+        },
+    });
+}
+
 export async function getUserByName(userName: string) {
     return await prisma.users.findUnique({
         where: {
@@ -29,7 +46,10 @@ export async function createUser(data: Prisma.usersCreateInput) {
     });
 }
 
-export async function updateUser(userId: number, data: Prisma.usersUpdateInput) {
+export async function updateUser(
+    userId: number,
+    data: Prisma.usersUpdateInput
+) {
     return await prisma.users.update({
         where: {
             user_id: userId,

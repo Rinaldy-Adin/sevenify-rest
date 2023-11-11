@@ -1,8 +1,5 @@
 import AppError from '@/common/AppError';
-import { IUserLoginReqDTO } from '@/common/interfaces/IUser';
-import { signIn } from '@/services/userService';
 import httpResponse from '@/utils/httpResponse';
-import { logger } from '@/utils/logger';
 import { NextFunction, Request, Response } from 'express';
 
 export default async function (
@@ -11,9 +8,11 @@ export default async function (
     next: NextFunction
 ) {
     try {
-        const { username, password }: IUserLoginReqDTO = req.body;
-        const { user, token } = await signIn(username, password);
-        return new httpResponse(res, { user, token }).json();
+        return new httpResponse(res, {
+            username: req.user?.username,
+            is_premium: req.user?.is_premium,
+            role: req.user?.role,
+        }).json();
     } catch (error) {
         if (error instanceof AppError) {
             next(error);

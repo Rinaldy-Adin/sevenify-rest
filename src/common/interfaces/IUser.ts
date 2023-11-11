@@ -1,5 +1,7 @@
 export interface IUserJWT {
     username: string;
+    is_premium: boolean;
+    role: 'admin' | 'user';
     phpSessId: string;
 }
 
@@ -10,9 +12,20 @@ export interface IUserDAO {
     role: 'admin' | 'user';
 }
 
-export interface IUserDTO {
+export interface IUserLoginReqDTO {
     username: string;
     password: string;
+}
+
+export interface IUserActionReqDTO {
+    action: 'accept' | 'reject';
+}
+
+export interface IUserRespDTO {
+    user_id: number;
+    user_name: string;
+    is_premium: boolean;
+    role: 'admin' | 'user';
 }
 
 export interface IUserPHPRespDTO {
