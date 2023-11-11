@@ -1,26 +1,26 @@
-import { Prisma } from '@prisma/client';
 import prisma from '@/prisma';
+import { Prisma } from '@prisma/client';
 
-export function getAllAlbums() {
-    return prisma.albums.findMany();
+export async function getAllAlbums() {
+    return await prisma.albums.findMany();
 }
 
-export function getAlbumById(albumId: number) {
-    return prisma.albums.findUnique({
+export async function getAlbumById(albumId: number) {
+    return await prisma.albums.findUnique({
         where: {
             album_id: albumId,
         },
     });
 }
 
-export function createAlbum(data: Prisma.albumsCreateInput) {
-    return prisma.albums.create({
+export async function createAlbum(data: Prisma.albumsCreateInput) {
+    return await prisma.albums.create({
         data,
     });
 }
 
-export function updateAlbum(albumId: number, data: Prisma.albumsUpdateInput) {
-    return prisma.albums.update({
+export async function updateAlbum(albumId: number, data: Prisma.albumsUpdateInput) {
+    return await prisma.albums.update({
         where: {
             album_id: albumId,
         },
@@ -28,8 +28,8 @@ export function updateAlbum(albumId: number, data: Prisma.albumsUpdateInput) {
     });
 }
 
-export function deleteAlbum(albumId: number) {
-    return prisma.albums.delete({
+export async function deleteAlbum(albumId: number) {
+    return await prisma.albums.delete({
         where: {
             album_id: albumId,
         },

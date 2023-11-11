@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import {default as httpLogger} from 'pino-http';
 import {logger} from '@/utils/logger';
+import loadRoutes from '@/api';
 
 const createServer = (): express.Application => {
     const app = express();
@@ -16,6 +17,7 @@ const createServer = (): express.Application => {
     app.get('/health', (_req, res) => {
         res.send('UP');
     })
+    loadRoutes(app);
 
     return app;
 };

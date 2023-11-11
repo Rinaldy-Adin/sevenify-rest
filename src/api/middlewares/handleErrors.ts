@@ -1,4 +1,5 @@
 import AppError from '@/common/AppError';
+import httpResponse from '@/utils/httpResponse';
 import { logger } from '@/utils/logger';
 import { Application, NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
@@ -17,12 +18,12 @@ export default function handleErrors(app: Application): void {
             next: NextFunction
         ): void => {
             logger.error(err.message);
-            res.status(err.status || 500);
-            res.json({
-                status: 'fail',
-                message: `${err.message}`,
-                data: null,
-            });
+            new httpResponse(
+                res,
+                null,
+                err.status || 500,
+                err.message
+            ).json();
         }
     );
 }

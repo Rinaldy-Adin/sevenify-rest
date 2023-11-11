@@ -14,6 +14,7 @@ const config = {
     logs: {
         level: process.env.LOG_LEVEL || 'debug',
     },
+    phpUrl: process.env.PHP_URL || '',
 };
 
 export default config;

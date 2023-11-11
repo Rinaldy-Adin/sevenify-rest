@@ -1,26 +1,26 @@
-import prisma from "@/prisma";
-import { Prisma } from "@prisma/client";
+import prisma from '@/prisma';
+import { Prisma } from '@prisma/client';
 
-export function getMusicById(musicId: number) {
-    return prisma.music.findUnique({
+export async function getMusicById(musicId: number) {
+    return await prisma.music.findUnique({
         where: {
             music_id: musicId,
         },
     });
 }
 
-export function getAllMusic() {
-    return prisma.music.findMany();
+export async function getAllMusic() {
+    return await prisma.music.findMany();
 }
 
-export function createMusic(data: Prisma.musicCreateInput) {
-    return prisma.music.create({
+export async function createMusic(data: Prisma.musicCreateInput) {
+    return await prisma.music.create({
         data,
     });
 }
 
-export function updateMusic(musicId: number, data: Prisma.musicUpdateInput) {
-    return prisma.music.update({
+export async function updateMusic(musicId: number, data: Prisma.musicUpdateInput) {
+    return await prisma.music.update({
         where: {
             music_id: musicId,
         },
@@ -28,8 +28,8 @@ export function updateMusic(musicId: number, data: Prisma.musicUpdateInput) {
     });
 }
 
-export function deleteMusic(musicId: number) {
-    return prisma.music.delete({
+export async function deleteMusic(musicId: number) {
+    return await prisma.music.delete({
         where: {
             music_id: musicId,
         },

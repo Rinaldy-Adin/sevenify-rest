@@ -1,34 +1,36 @@
 import prisma from '@/prisma';
+import { logger } from '@/utils/logger';
 import { Prisma } from '@prisma/client';
 
-export function getUserById(userId: number) {
-    return prisma.users.findUnique({
+export async function getUserById(userId: number) {
+    return await prisma.users.findUnique({
         where: {
             user_id: userId,
         },
     });
 }
 
-export function getAllUsers() {
-    return prisma.users.findMany();
+export async function getAllUsers() {
+    return await prisma.users.findMany();
 }
 
-export function getUserByName(userName: string) {
-    return prisma.users.findUnique({
+export async function getUserByName(userName: string) {
+    return await prisma.users.findUnique({
         where: {
-            user_name: userName
-        }
+            user_name: userName,
+        },
     });
 }
 
-export function createUser(data: Prisma.usersCreateInput) {
-    return prisma.users.create({
+export async function createUser(data: Prisma.usersCreateInput) {
+    logger.info(data);
+    return await prisma.users.create({
         data,
     });
 }
 
-export function updateUser(userId: number, data: Prisma.usersUpdateInput) {
-    return prisma.users.update({
+export async function updateUser(userId: number, data: Prisma.usersUpdateInput) {
+    return await prisma.users.update({
         where: {
             user_id: userId,
         },
@@ -36,8 +38,8 @@ export function updateUser(userId: number, data: Prisma.usersUpdateInput) {
     });
 }
 
-export function deleteUser(userId: number) {
-    return prisma.users.delete({
+export async function deleteUser(userId: number) {
+    return await prisma.users.delete({
         where: {
             user_id: userId,
         },

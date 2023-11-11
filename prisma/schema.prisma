@@ -42,13 +42,12 @@ model music {
 }
 
 model users {
-  user_id       Int        @id @default(autoincrement())
-  user_name     String     @unique(map: "user_name") @db.VarChar(255)
-  user_password String     @db.VarChar(255)
-  user_premium  Boolean    @default(false)
-  role          users_role
-  albums        albums[]
-  music         music[]
+  user_id      Int        @id @default(autoincrement())
+  user_name    String     @unique(map: "user_name") @db.VarChar(255)
+  user_premium Boolean    @default(false)
+  role         users_role
+  albums       albums[]
+  music        music[]
 }
 
 enum users_role {
