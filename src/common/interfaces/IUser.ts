@@ -32,7 +32,7 @@ export interface IUserRespDTO {
 export interface IUserPHPRespDTO {
     status: string;
     data: {
-        user_id: number;
+        user_id: string;
         user_name: string;
         role: 'admin' | 'user';
     };

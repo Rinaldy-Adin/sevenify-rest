@@ -1,7 +1,6 @@
 interface ICreateMusicRequestDTO {
-    id: number;
     title: string;
-    genre: string;
+    genre?: string;
     cover: File;
     audio: File;
 }
@@ -33,7 +32,7 @@ interface IMusicResponseDTO {
     id: number;
     title: string;
     genre: string;
-owner_id: number;
+    owner_id: number;
     upload_date: Date;
     is_premium: boolean;
 }

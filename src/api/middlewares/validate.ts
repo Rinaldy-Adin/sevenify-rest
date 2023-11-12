@@ -32,6 +32,17 @@ export const validatePendingAction = validateBody(
     })
 );
 
+export const validateCreateMusic = validateBody(
+    z.object({
+        body: z.object({
+            title: z
+                .string({ required_error: 'title required' })
+                .min(1, { message: 'title cannot be empty' }),
+            genre: z.string().nullish(),
+        }),
+    })
+);
+
 const validatePerusahaanBody = validateBody(
     z.object({
         body: z.object({

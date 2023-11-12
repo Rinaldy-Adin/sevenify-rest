@@ -37,23 +37,23 @@ export const signIn = async (username: string, password: string) => {
         );
         const phpLoginData = phpLoginResp.data.data;
 
-        userRecord = await getUserById(phpLoginData.user_id);
+        userRecord = await getUserById(parseInt(phpLoginData.user_id));
 
         if (!userRecord) {
             userRecord = await createUser({
-                user_id: phpLoginData.user_id,
+                user_id: parseInt(phpLoginData.user_id),
                 user_name: phpLoginData.user_name,
                 user_premium: phpLoginData.role == 'admin',
                 role: phpLoginData.role,
             });
         } else if (userRecord.user_premium == false) {
-            userRecord = await updateUser(phpLoginData.user_id, {
+            userRecord = await updateUser(parseInt(phpLoginData.user_id), {
                 user_premium: phpLoginData.role == 'admin',
             });
         }
 
         user = {
-            user_id: phpLoginData.user_id,
+            user_id: parseInt(phpLoginData.user_id),
             user_name: phpLoginData.user_name,
             is_premium: userRecord.user_premium,
             role: phpLoginData.role,

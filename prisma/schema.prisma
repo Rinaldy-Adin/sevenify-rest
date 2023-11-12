@@ -8,7 +8,7 @@ datasource db {
 }
 
 model albums {
-  album_id    Int           @id
+  album_id    Int           @id @default(autoincrement())
   album_name  String        @db.VarChar(255)
   album_owner Int
   album_music album_music[]
@@ -18,7 +18,7 @@ model albums {
 }
 
 model music {
-  music_id          Int           @id
+  music_id          Int           @id @default(autoincrement())
   music_name        String        @db.VarChar(255)
   music_owner       Int
   music_genre       String?       @db.VarChar(255)
