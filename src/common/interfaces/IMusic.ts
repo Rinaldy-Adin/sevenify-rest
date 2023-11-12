@@ -14,6 +14,17 @@ interface IMusic {
     isPremium: boolean;
 }
 
+interface IGetMusicPHPRespDTO {
+    status: string;
+    data: {
+        music_id: number;
+        music_name: string;
+        music_owner: string;
+        music_genre: string;
+        music_upload_date: Date;
+    };
+}
+
 interface IMusicSearchPHPRespDTO {
     status: string;
     data: {

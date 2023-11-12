@@ -43,6 +43,23 @@ export const validateCreateMusic = validateBody(
     })
 );
 
+export const validateGetMusicById = validateBody(
+    z.object({
+        params: z.object({
+            music_id: z
+                .string({ required_error: 'music id required' })
+                .refine((data) => Number.isInteger(Number(data)), {
+                    message: 'music id must be an integer',
+                }),
+        }),
+        query: z.object({
+            premium: z.enum(['true', 'false'], {
+                required_error: 'Premium required',
+            }),
+        }),
+    })
+);
+
 const validatePerusahaanBody = validateBody(
     z.object({
         body: z.object({
