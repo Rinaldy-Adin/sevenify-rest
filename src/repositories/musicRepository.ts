@@ -39,7 +39,7 @@ export async function updateMusic(
     });
 }
 
-export async function deleteMusic(musicId: number) {
+export async function deleteMusicById(musicId: number) {
     return await prisma.music.delete({
         where: {
             music_id: musicId,

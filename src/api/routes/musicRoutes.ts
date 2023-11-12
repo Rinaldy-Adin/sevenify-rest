@@ -5,6 +5,7 @@ import { validateCreateMusic, validateGetMusicById } from '../middlewares/valida
 import createMusicController from '@/controllers/music/createMusicController';
 import upload from '@/utils/multer';
 import getMusicByIdController from '@/controllers/music/getMusicByIdController';
+import deleteMusicByIdController from '@/controllers/music/deleteMusicByIdController';
 
 export default function (app: Router) {
     app.get(
@@ -12,6 +13,7 @@ export default function (app: Router) {
         authenticateToken(true, 'user', 'admin'),
         getAllMusicController
     );
+
     app.post(
         '/music',
         authenticateToken(true, 'user', 'admin'),
@@ -28,5 +30,12 @@ export default function (app: Router) {
         authenticateToken(true, 'user', 'admin'),
         validateGetMusicById,
         getMusicByIdController
+    );
+
+    app.delete(
+        '/music/:music_id',
+        authenticateToken(true, 'user', 'admin'),
+        validateGetMusicById,
+        deleteMusicByIdController
     );
 }
