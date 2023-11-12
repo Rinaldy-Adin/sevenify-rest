@@ -7,6 +7,37 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model albums {
+  album_id    Int           @id
+  album_name  String        @db.VarChar(255)
+  album_owner Int
+  album_music album_music[]
+  users       users         @relation(fields: [album_owner], references: [user_id], onDelete: Cascade, map: "albums_ibfk_1")
+
+  @@index([album_owner], map: "album_owner")
+}
+
+model music {
+  music_id          Int           @id
+  music_name        String        @db.VarChar(255)
+  music_owner       Int
+  music_genre       String?       @db.VarChar(255)
+  music_upload_date DateTime      @db.Date
+  album_music       album_music[]
+  users             users         @relation(fields: [music_owner], references: [user_id], onDelete: Cascade, map: "music_ibfk_1")
+
+  @@index([music_owner], map: "music_owner")
+}
+
+model users {
+  user_id      Int        @id
+  user_name    String     @db.VarChar(255)
+  user_premium Boolean    @default(false)
+  role         users_role
+  albums       albums[]
+  music        music[]
+}
+
 model album_music {
   music_id Int
   album_id Int
@@ -15,39 +46,6 @@ model album_music {
 
   @@id([music_id, album_id])
   @@index([album_id], map: "album_id")
-}
-
-model albums {
-  album_id       Int           @id @default(autoincrement())
-  album_name     String        @db.VarChar(255)
-  album_owner    Int
-  albums_premium Boolean       @default(true)
-  album_music    album_music[]
-  users          users         @relation(fields: [album_owner], references: [user_id], onDelete: Cascade, map: "albums_ibfk_1")
-
-  @@index([album_owner], map: "album_owner")
-}
-
-model music {
-  music_id          Int           @id @default(autoincrement())
-  music_name        String        @db.VarChar(255)
-  music_owner       Int
-  music_genre       String?       @db.VarChar(255)
-  music_upload_date DateTime      @db.Date
-  music_premium     Boolean       @default(true)
-  album_music       album_music[]
-  users             users         @relation(fields: [music_owner], references: [user_id], onDelete: Cascade, map: "music_ibfk_1")
-
-  @@index([music_owner], map: "music_owner")
-}
-
-model users {
-  user_id      Int        @id @default(autoincrement())
-  user_name    String     @unique(map: "user_name") @db.VarChar(255)
-  user_premium Boolean    @default(false)
-  role         users_role
-  albums       albums[]
-  music        music[]
 }
 
 enum users_role {

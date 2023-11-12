@@ -1,4 +1,5 @@
 export interface IUserJWT {
+    id: number;
     username: string;
     is_premium: boolean;
     role: 'admin' | 'user';

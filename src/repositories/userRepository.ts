@@ -31,16 +31,7 @@ export async function getPendingUsers() {
     });
 }
 
-export async function getUserByName(userName: string) {
-    return await prisma.users.findUnique({
-        where: {
-            user_name: userName,
-        },
-    });
-}
-
 export async function createUser(data: Prisma.usersCreateInput) {
-    logger.info(data);
     return await prisma.users.create({
         data,
     });
