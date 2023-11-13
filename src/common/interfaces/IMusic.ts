@@ -1,11 +1,13 @@
-interface ICreateMusicRequestDTO {
+import { Blob } from "buffer";
+
+export interface ICreateMusicRequestDTO {
     title: string;
     genre?: string;
     cover: File;
     audio: File;
 }
 
-interface IMusic {
+export interface IMusic {
     id: number;
     name: string;
     ownerId: number;
@@ -14,7 +16,12 @@ interface IMusic {
     isPremium: boolean;
 }
 
-interface IGetMusicPHPRespDTO {
+export interface IMusicCover {
+    blob: Blob;
+    ext: string;
+}
+
+export interface IGetMusicPHPRespDTO {
     status: string;
     data: {
         music_id: number;
@@ -25,7 +32,7 @@ interface IGetMusicPHPRespDTO {
     };
 }
 
-interface IMusicSearchPHPRespDTO {
+export interface IMusicSearchPHPRespDTO {
     status: string;
     data: {
         result: {
@@ -39,7 +46,7 @@ interface IMusicSearchPHPRespDTO {
     };
 }
 
-interface IMusicResponseDTO {
+export interface IMusicResponseDTO {
     id: number;
     title: string;
     genre: string;

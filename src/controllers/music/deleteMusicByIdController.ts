@@ -5,6 +5,7 @@ import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
 import { deleteMusic } from '@/services/musicService';
 import { logger } from '@/utils/logger';
+import { IMusicResponseDTO } from '@/common/interfaces/IMusic';
 
 export default async function (
     req: Request<{ music_id: string }, {}, {}, { premium: 'true' | 'false' }>,

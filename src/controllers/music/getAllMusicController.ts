@@ -1,4 +1,5 @@
 import AppError from '@/common/AppError';
+import { IMusicResponseDTO } from '@/common/interfaces/IMusic';
 import { allMusic } from '@/services/musicService';
 import httpResponse from '@/utils/httpResponse';
 import { NextFunction, Request, Response } from 'express';

@@ -1,4 +1,5 @@
 import AppError from '@/common/AppError';
+import { ICreateMusicRequestDTO, IMusicResponseDTO } from '@/common/interfaces/IMusic';
 import { addNewMusic } from '@/services/musicService';
 import httpResponse from '@/utils/httpResponse';
 import { logger } from '@/utils/logger';

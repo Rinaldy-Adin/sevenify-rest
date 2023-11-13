@@ -12,7 +12,16 @@ import { logger } from '@/utils/logger';
 import { StatusCodes } from 'http-status-codes';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { Blob } from 'buffer';
 import { AxiosError } from 'axios';
+import { glob } from 'glob';
+import * as FileType from 'file-type';
+import {
+    IGetMusicPHPRespDTO,
+    IMusic,
+    IMusicCover,
+    IMusicSearchPHPRespDTO,
+} from '@/common/interfaces/IMusic';
 
 export async function musicById(
     phpSessId: string,
@@ -149,7 +158,7 @@ export async function addNewMusic(
         if (coverBuff) {
             const coverPath = path.resolve(
                 __dirname,
-                '../../storage/covers',
+                '../../storage/covers/music',
                 `${musicRecord.music_id}.${coverExt}`
             );
             promises.push(fs.writeFile(coverPath, coverBuff));
@@ -165,7 +174,12 @@ export async function addNewMusic(
     }
 }
 
-export async function deleteMusic(phpSessId: string, userId: number, musicId: number, premium: boolean) {
+export async function deleteMusic(
+    phpSessId: string,
+    userId: number,
+    musicId: number,
+    premium: boolean
+) {
     if (premium) {
         const musicRecord = await getMusicById(musicId);
 
@@ -185,6 +199,16 @@ export async function deleteMusic(phpSessId: string, userId: number, musicId: nu
             ownerId: musicRecord.music_owner,
             uploadDate: musicRecord.music_upload_date,
         };
+
+        const musicPaths = await glob(
+            path.join(__dirname, `../../storage/covers/music/${musicId}.*`)
+        );
+        if (musicPaths.length == 1) fs.unlink(musicPaths[0]);
+
+        const audioPaths = await glob(
+            path.join(__dirname, `../../storage/audio/${musicId}.*`)
+        );
+        fs.unlink(audioPaths[0])
 
         return music;
     } else {
@@ -214,14 +238,11 @@ export async function deleteMusic(phpSessId: string, userId: number, musicId: nu
                     'Music does not exist'
                 );
 
-            await phpClient.delete(
-                `/music/${musicId}`,
-                {
-                    headers: {
-                        Cookie: `PHPSESSID=${phpSessId}`,
-                    },
-                }
-            );
+            await phpClient.delete(`/music/${musicId}`, {
+                headers: {
+                    Cookie: `PHPSESSID=${phpSessId}`,
+                },
+            });
 
             return music;
         } catch (error) {
@@ -229,6 +250,57 @@ export async function deleteMusic(phpSessId: string, userId: number, musicId: nu
                 throw new AppError(
                     StatusCodes.BAD_REQUEST,
                     'Music does not exist'
+                );
+            if (error instanceof AppError) throw error;
+            throw new AppError();
+        }
+    }
+}
+
+export async function musicCoverBlob(
+    phpSessId: string,
+    musicId: number,
+    premium: boolean
+): Promise<IMusicCover> {
+    if (premium) {
+        const paths = await glob(
+            path.join(__dirname, `../../storage/covers/music/${musicId}.*`)
+        );
+        if (paths.length < 1)
+            throw new AppError(
+                StatusCodes.NOT_FOUND,
+                'Cover file doesnt exist'
+            );
+
+        const coverPath = paths[0];
+        const fileBuffer = await fs.readFile(coverPath);
+
+        return {
+            blob: new Blob([fileBuffer]),
+            ext: (await FileType.fromBuffer(fileBuffer))?.ext ?? '',
+        };
+    } else {
+        try {
+            const phpCoverArrayBuffer = await phpClient.get<ArrayBuffer>(
+                `/music-cover/${musicId}`,
+                {
+                    headers: {
+                        Cookie: `PHPSESSID=${phpSessId}`,
+                    },
+                    responseType: 'arraybuffer',
+                }
+            );
+            const fileBuffer = Buffer.from(phpCoverArrayBuffer.data);
+
+            return {
+                blob: new Blob([fileBuffer]),
+                ext: (await FileType.fromBuffer(fileBuffer))?.ext ?? '',
+            };
+        } catch (error) {
+            if (error instanceof AxiosError && error.response?.status == 400)
+                throw new AppError(
+                    StatusCodes.BAD_REQUEST,
+                    'Cover file does not exist'
                 );
             if (error instanceof AppError) throw error;
             throw new AppError();
