@@ -21,7 +21,7 @@ export default async function (
                 title: item.name,
                 owner_id: item.ownerId,
                 is_premium: item.isPremium,
-                music_id: item.musicIds,
+                music_id: item.music_id,
             }
 
             return albumDTO;

@@ -29,7 +29,7 @@ export default async function (
             title: album.name,
             owner_id: album.ownerId,
             is_premium: album.isPremium,
-            music_id: album.musicIds,
+            music_id: album.music_id,
         };
         return new httpResponse(res, {album: albumDTO}, 200, 'Successfully deleted album').json();
     } catch (error) {

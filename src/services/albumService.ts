@@ -32,7 +32,7 @@ export async function allAlbum(phpSessId: string, userId: number) {
             name: album.album_name,
             ownerId: album.album_owner,
             isPremium: true,
-            musicIds: album.album_music_id?.map((music: any) => music.music_id) || [],
+            music_id: album.album_music_id?.map((music: any) => music.music_id) || [],
         })
     );
 
@@ -54,7 +54,7 @@ export async function allAlbum(phpSessId: string, userId: number) {
             name: album.album_name,
             ownerId: album.album_owner_id,
             isPremium: false,
-            musicIds: album.album_music_id
+            music_id: album.album_music_id
         })
     );
 
@@ -66,7 +66,7 @@ export async function addNewAlbum(
     ownerId: number,
     coverBuff: Buffer | null,
     coverExt: string | null,
-    musicIds: number[]
+    music_id: number[]
 ){
     try {
         const albumRecord = await createAlbum({
@@ -127,7 +127,7 @@ export async function deleteAlbum(
             name: albumRecord.album_name,
             ownerId: albumRecord.album_owner,
             isPremium: true,
-            musicIds: albumRecord.album_music_id.map((music_id: number) => music_id),
+            music_id: albumRecord.album_music_id.map((music_id: number) => music_id),
         };
 
         const coverPaths = await glob(
@@ -157,7 +157,7 @@ export async function deleteAlbum(
                 name: phpAlbumData.album_name,
                 ownerId: phpAlbumData.album_owner_id,
                 isPremium: false,
-                musicIds: phpAlbumData.album_music_id,
+                music_id: phpAlbumData.album_music_id,
             };
 
             if (album.ownerId != userId)
