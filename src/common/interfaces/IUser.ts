@@ -1,4 +1,5 @@
 export interface IUserJWT {
+    id: number;
     username: string;
     is_premium: boolean;
     role: 'admin' | 'user';
@@ -31,7 +32,7 @@ export interface IUserRespDTO {
 export interface IUserPHPRespDTO {
     status: string;
     data: {
-        user_id: number;
+        user_id: string;
         user_name: string;
         role: 'admin' | 'user';
     };

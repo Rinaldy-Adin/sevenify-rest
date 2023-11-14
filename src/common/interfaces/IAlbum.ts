@@ -1,20 +1,45 @@
-interface ICreateAlbumRequestDTO {
-    id: number;
+import { Blob } from "buffer";
+
+export interface ICreateAlbumRequestDTO {
     title: string;
     cover: File;
+    music_id: string[];
 }
 
-interface IAlbum {
-    album_id: number;
-    album_name: string;
-    album_owner: number;
-    album_premium: boolean;
+export interface IUpdateMusicRequestDTO {
+    title?: string;
+    cover?: File;
+    music_id?: string[];
+    is_premium?: 'true' | 'false';
+    delete_cover?: string;
 }
 
-interface IAlbumResponseDTO {
+export interface IAlbum {
+    id: number;
+    name: string;
+    ownerId: number;
+    isPremium: boolean;
+    musicIds: number[];
+}
+
+export interface IUpdateAlbum {
+    title?: string;
+    isPremium?: boolean;
+    musicIds?: number[];
+    coverBuff?: Buffer;
+    coverExt?: string;
+    deleteCover?: boolean;
+}
+
+export interface IAlbumCover {
+    blob: Blob;
+    ext: string;
+}
+
+export interface IAlbumResponseDTO {
     id: number;
     title: string;
     owner_id: number;
-    owner_name: string;
     is_premium: boolean;
+    music_id: number[];
 }

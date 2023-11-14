@@ -13,13 +13,24 @@ export async function getAllMusic() {
     return await prisma.music.findMany();
 }
 
+export async function getAllMusicByUserId(userId: number) {
+    return await prisma.music.findMany({
+        where: {
+            music_owner: userId,
+        },
+    });
+}
+
 export async function createMusic(data: Prisma.musicCreateInput) {
     return await prisma.music.create({
         data,
     });
 }
 
-export async function updateMusic(musicId: number, data: Prisma.musicUpdateInput) {
+export async function updateMusicById(
+    musicId: number,
+    data: Prisma.musicUpdateInput
+) {
     return await prisma.music.update({
         where: {
             music_id: musicId,
@@ -28,7 +39,7 @@ export async function updateMusic(musicId: number, data: Prisma.musicUpdateInput
     });
 }
 
-export async function deleteMusic(musicId: number) {
+export async function deleteMusicById(musicId: number) {
     return await prisma.music.delete({
         where: {
             music_id: musicId,

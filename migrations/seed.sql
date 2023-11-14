@@ -4,9 +4,8 @@ CREATE DATABASE IF NOT EXISTS sevenify_rest;
 USE sevenify_rest;
 -- Create tables
 CREATE TABLE IF NOT EXISTS users (
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT PRIMARY KEY,
     user_name VARCHAR(255) UNIQUE NOT NULL,
-    user_password VARCHAR(255) NOT NULL,
     user_premium BOOL NOT NULL DEFAULT 0,
     role ENUM('user', 'admin') NOT NULL
 );
@@ -15,7 +14,6 @@ CREATE TABLE IF NOT EXISTS albums (
     album_id INT AUTO_INCREMENT PRIMARY KEY,
     album_name VARCHAR(255) NOT NULL,
     album_owner INT NOT NULL,
-    albums_premium BOOL NOT NULL DEFAULT 1,
     FOREIGN KEY (album_owner) REFERENCES users(user_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
@@ -27,7 +25,6 @@ CREATE TABLE IF NOT EXISTS music (
     music_owner INT NOT NULL,
     music_genre VARCHAR(255),
     music_upload_date DATE NOT NULL,
-    music_premium BOOL NOT NULL DEFAULT 1,
     FOREIGN KEY (music_owner) REFERENCES users(user_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
