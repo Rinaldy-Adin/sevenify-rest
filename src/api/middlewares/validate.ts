@@ -103,3 +103,31 @@ const validatePerusahaanBody = validateBody(
         }),
     })
 );
+
+export const validateCreateAlbum = validateBody(
+    z.object({
+        body: z.object({
+            title: z
+                .string({ required_error: 'title required' })
+                .min(1, { message: 'title cannot be empty' }),
+            genre: z.string().nullish(),
+        }),
+    })
+);
+
+export const validateGetAlbumById = validateBody(
+    z.object({
+        params: z.object({
+            album_id: z
+                .string({ required_error: 'album id required' })
+                .refine((data) => Number.isInteger(Number(data)), {
+                    message: 'album id must be an integer',
+                }),
+        }),
+        query: z.object({
+            premium: z.enum(['true', 'false'], {
+                required_error: 'Premium required',
+            }),
+        }),
+    })
+);
