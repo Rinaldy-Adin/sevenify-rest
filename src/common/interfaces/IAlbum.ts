@@ -19,13 +19,13 @@ export interface IAlbum {
     name: string;
     ownerId: number;
     isPremium: boolean;
-    musicIds: number[];
+    music_id: number[];
 }
 
 export interface IUpdateAlbum {
     title?: string;
     isPremium?: boolean;
-    musicIds?: number[];
+    music_id?: number[];
     coverBuff?: Buffer;
     coverExt?: string;
     deleteCover?: boolean;
