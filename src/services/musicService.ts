@@ -6,22 +6,27 @@ import {
     getAllMusic,
     getAllMusicByUserId,
     getMusicById,
+    updateMusicById,
 } from '@/repositories/musicRepository';
 import { getUserById } from '@/repositories/userRepository';
 import { logger } from '@/utils/logger';
 import { StatusCodes } from 'http-status-codes';
-import { promises as fs } from 'fs';
+import { promises as fs, readFileSync } from 'fs';
 import path from 'path';
 import { Blob } from 'buffer';
 import { AxiosError } from 'axios';
 import { glob } from 'glob';
 import * as FileType from 'file-type';
 import {
+    ICreateMusicPHPRespDTO,
     IGetMusicPHPRespDTO,
     IMusic,
     IMusicCover,
     IMusicSearchPHPRespDTO,
+    IUpdateMusic,
 } from '@/common/interfaces/IMusic';
+import FormData from 'form-data';
+import { ContentType } from '@/common/enums';
 
 export async function musicById(
     phpSessId: string,
@@ -66,7 +71,7 @@ export async function musicById(
                 isPremium: false,
                 name: phpMusicData.music_name,
                 ownerId: parseInt(phpMusicData.music_owner),
-                uploadDate: phpMusicData.music_upload_date,
+                uploadDate: new Date(phpMusicData.music_upload_date),
             };
 
             if (music.ownerId != userId)
@@ -200,15 +205,15 @@ export async function deleteMusic(
             uploadDate: musicRecord.music_upload_date,
         };
 
-        const musicPaths = await glob(
+        const coverPaths = await glob(
             path.join(__dirname, `../../storage/covers/music/${musicId}.*`)
         );
-        if (musicPaths.length == 1) fs.unlink(musicPaths[0]);
+        if (coverPaths.length == 1) fs.unlink(coverPaths[0]);
 
         const audioPaths = await glob(
             path.join(__dirname, `../../storage/audio/${musicId}.*`)
         );
-        fs.unlink(audioPaths[0])
+        fs.unlink(audioPaths[0]);
 
         return music;
     } else {
@@ -229,7 +234,7 @@ export async function deleteMusic(
                 isPremium: false,
                 name: phpMusicData.music_name,
                 ownerId: parseInt(phpMusicData.music_owner),
-                uploadDate: phpMusicData.music_upload_date,
+                uploadDate: new Date(phpMusicData.music_upload_date),
             };
 
             if (music.ownerId != userId)
@@ -304,6 +309,323 @@ export async function musicCoverBlob(
                 );
             if (error instanceof AppError) throw error;
             throw new AppError();
+        }
+    }
+}
+
+export async function updateMusic(
+    phpSessId: string,
+    userId: number,
+    musicId: number,
+    premium: boolean,
+    updateData: IUpdateMusic
+): Promise<IMusic> {
+    if (premium) {
+        const musicRecord = await getMusicById(musicId);
+
+        if (!musicRecord)
+            throw new AppError(StatusCodes.BAD_REQUEST, 'Music does not exist');
+
+        if (musicRecord.music_owner != userId)
+            throw new AppError(StatusCodes.BAD_REQUEST, 'Music does not exist');
+
+        if (updateData.isPremium == false) {
+            try {
+                const formData = new FormData();
+
+                formData.append(
+                    'title',
+                    updateData.title ?? musicRecord.music_name
+                );
+                logger.info(updateData.title ?? musicRecord.music_name);
+
+                formData.append(
+                    'genre',
+                    updateData.genre ?? musicRecord.music_genre
+                );
+                logger.info(updateData.genre ?? musicRecord.music_genre);
+
+                if (updateData.deleteCover == true) {
+                    formData.append('cover-file', '', '');
+                } else if (updateData.coverBuff != undefined) {
+                    formData.append('cover-file', updateData.coverBuff, '');
+                } else {
+                    const paths = await glob(
+                        path.join(
+                            __dirname,
+                            `../../storage/covers/music/${musicId}.*`
+                        )
+                    );
+                    if (paths.length == 1) {
+                        const coverPath = paths[0];
+                        const fileBuffer = await fs.readFile(coverPath);
+                        formData.append('cover-file', fileBuffer, '');
+                    } else {
+                        formData.append('cover-file', '', '');
+                    }
+                }
+
+                const audioPaths = await glob(
+                    path.join(__dirname, `../../storage/audio/${musicId}.*`)
+                );
+                if (audioPaths.length == 1) {
+                    const audioPath = audioPaths[0];
+                    formData.append('music-file', readFileSync(audioPath), 'name.m4a');
+                }
+
+                const formHeaders = formData.getHeaders();
+                const phpCreateResp =
+                    await phpClient.post<ICreateMusicPHPRespDTO>(
+                        `/music`,
+                        formData.getBuffer(),
+                        {
+                            headers: {
+                                Cookie: `PHPSESSID=${phpSessId}`,
+                                ...formHeaders,
+                            },
+                        }
+                    );
+
+                const phpCreateData = phpCreateResp.data.data;
+
+                const music: IMusic = {
+                    id: phpCreateData.music_id,
+                    genre: phpCreateData.music_genre ?? '',
+                    isPremium: false,
+                    name: phpCreateData.music_name,
+                    ownerId: userId,
+                    uploadDate: phpCreateData.music_upload_date,
+                };
+
+                await deleteMusic(phpSessId, userId, musicId, true);
+
+                return music;
+            } catch (error) {
+                if (
+                    error instanceof AxiosError &&
+                    error.response?.status == 400
+                )
+                    throw new AppError(
+                        StatusCodes.BAD_REQUEST,
+                        'Cover file does not exist'
+                    );
+                if (error instanceof AppError) throw error;
+                throw new AppError();
+            }
+        } else {
+            const updatedRecord = await updateMusicById(musicId, {
+                music_name: updateData.title,
+                music_genre: updateData.genre,
+            });
+
+            if (updateData.deleteCover == true) {
+                const coverPaths = await glob(
+                    path.join(
+                        __dirname,
+                        `../../storage/covers/music/${musicId}.*`
+                    )
+                );
+                if (coverPaths.length == 1) fs.unlink(coverPaths[0]);
+            } else if (updateData.coverBuff != undefined) {
+                const coverPaths = await glob(
+                    path.join(
+                        __dirname,
+                        `../../storage/covers/music/${musicId}.*`
+                    )
+                );
+                if (coverPaths.length == 1) fs.unlink(coverPaths[0]);
+
+                const coverPath = path.resolve(
+                    __dirname,
+                    '../../storage/covers/music',
+                    `${musicRecord.music_id}.${updateData.coverExt}`
+                );
+                await fs.writeFile(coverPath, updateData.coverBuff);
+            }
+
+            const music: IMusic = {
+                id: updatedRecord.music_id,
+                genre: updatedRecord.music_genre ?? '',
+                isPremium: true,
+                name: updatedRecord.music_name,
+                ownerId: userId,
+                uploadDate: updatedRecord.music_upload_date,
+            };
+
+            return music;
+        }
+    } else {
+        let phpMusicResp: IGetMusicPHPRespDTO;
+        try {
+            phpMusicResp = (
+                await phpClient.get<IGetMusicPHPRespDTO>(`/music/${musicId}`, {
+                    headers: {
+                        Cookie: `PHPSESSID=${phpSessId}`,
+                    },
+                })
+            ).data;
+        } catch (error) {
+            if (error instanceof AxiosError && error.response?.status == 400)
+                throw new AppError(
+                    StatusCodes.BAD_REQUEST,
+                    'Music does not exist'
+                );
+            if (error instanceof AppError) throw error;
+            throw new AppError();
+        }
+
+        const phpMusicData = phpMusicResp.data ?? {};
+
+        if (updateData.isPremium == true) {
+            const newRecord = await createMusic({
+                music_name: updateData.title ?? phpMusicData.music_name,
+                music_genre: updateData.genre ?? phpMusicData.music_genre,
+                music_upload_date: new Date(phpMusicData.music_upload_date),
+                users: {
+                    connect: {
+                        user_id: userId,
+                    },
+                },
+            });
+
+            try {
+                if (updateData.deleteCover != true) {
+                    const phpCoverArrayBuffer = (
+                        await phpClient.get<ArrayBuffer>(
+                            `/music-cover/${musicId}`,
+                            {
+                                headers: {
+                                    Cookie: `PHPSESSID=${phpSessId}`,
+                                },
+                                responseType: 'arraybuffer',
+                            }
+                        )
+                    ).data;
+
+                    const coverPath = path.resolve(
+                        __dirname,
+                        '../../storage/covers/music',
+                        `${newRecord.music_id}.${
+                            (await FileType.fromBuffer(phpCoverArrayBuffer))
+                                ?.ext
+                        }`
+                    );
+                    fs.writeFile(coverPath, Buffer.from(phpCoverArrayBuffer));
+                }
+            } catch (error) {
+                if (
+                    error instanceof AxiosError &&
+                    error.response?.status == 400
+                ) {
+                } else if (error instanceof AppError) {
+                    throw error;
+                } else throw new AppError();
+            }
+
+            try {
+                const phpAudioArrayBuffer = (
+                    await phpClient.get<ArrayBuffer>(`/audio/${musicId}`, {
+                        headers: {
+                            Cookie: `PHPSESSID=${phpSessId}`,
+                        },
+                        responseType: 'arraybuffer',
+                    })
+                ).data;
+
+                const audioPath = path.resolve(
+                    __dirname,
+                    '../../storage/audio',
+                    `${newRecord.music_id}.${
+                        (await FileType.fromBuffer(phpAudioArrayBuffer))?.ext
+                    }`
+                );
+                fs.writeFile(audioPath, Buffer.from(phpAudioArrayBuffer));
+            } catch (error) {
+                logger.error('Error getting audio file from PHP');
+                if (
+                    error instanceof AxiosError &&
+                    error.response?.status == 400
+                ) {
+                    throw new AppError();
+                }
+                if (error instanceof AppError) throw error;
+                throw new AppError();
+            }
+
+            await deleteMusic(phpSessId, userId, musicId, false);
+
+            const music = {
+                id: newRecord.music_id,
+                genre: newRecord.music_genre ?? '',
+                isPremium: true,
+                name: newRecord.music_name,
+                ownerId: newRecord.music_owner,
+                uploadDate: newRecord.music_upload_date,
+            };
+            return music;
+        } else {
+            try {
+                const formData = new FormData();
+
+                formData.append(
+                    'title',
+                    updateData.title ?? phpMusicData.music_name
+                );
+
+                formData.append(
+                    'genre',
+                    updateData.genre ?? phpMusicData.music_genre
+                );
+
+                if (updateData.deleteCover == true)
+                    formData.append('delete-cover', 'true');
+
+                formData.append(
+                    'cover-file',
+                    updateData.coverBuff != undefined
+                        ? updateData.coverBuff
+                        : '',
+                    ''
+                );
+
+                const formHeaders = formData.getHeaders();
+                const phpUpdateResp =
+                    await phpClient.post<ICreateMusicPHPRespDTO>(
+                        `/update-music/${musicId}`,
+                        formData.getBuffer(),
+                        {
+                            headers: {
+                                Cookie: `PHPSESSID=${phpSessId}`,
+                                ...formHeaders,
+                            },
+                        }
+                    );
+
+                const phpUpdateData = phpUpdateResp.data.data;
+
+                const music: IMusic = {
+                    id: phpUpdateData.music_id,
+                    genre: phpUpdateData.music_genre ?? '',
+                    isPremium: false,
+                    name: phpUpdateData.music_name,
+                    ownerId: userId,
+                    uploadDate: phpUpdateData.music_upload_date,
+                };
+
+                return music;
+            } catch (error) {
+                logger.error(error);
+                if (
+                    error instanceof AxiosError &&
+                    error.response?.status == 400
+                )
+                    throw new AppError(
+                        StatusCodes.BAD_REQUEST,
+                        'Update data invalid'
+                    );
+                if (error instanceof AppError) throw error;
+                throw new AppError();
+            }
         }
     }
 }

@@ -60,6 +60,31 @@ export const validateGetMusicById = validateBody(
     })
 );
 
+export const validateUpdateMusicById = validateBody(
+    z.object({
+        params: z.object({
+            music_id: z
+                .string({ required_error: 'music id required' })
+                .refine((data) => Number.isInteger(Number(data)), {
+                    message: 'music id must be an integer',
+                }),
+        }),
+        query: z.object({
+            premium: z.enum(['true', 'false'], {
+                required_error: 'Premium required',
+            }),
+        }),
+        body: z.object({
+            title: z
+                .string()
+                .min(1, { message: 'title cannot be empty' })
+                .nullish(),
+            genre: z.string().nullish(),
+            is_premium: z.enum(['true', 'false']).nullish(),
+        }),
+    })
+);
+
 const validatePerusahaanBody = validateBody(
     z.object({
         body: z.object({

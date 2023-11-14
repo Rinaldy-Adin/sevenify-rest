@@ -27,7 +27,7 @@ export async function createMusic(data: Prisma.musicCreateInput) {
     });
 }
 
-export async function updateMusic(
+export async function updateMusicById(
     musicId: number,
     data: Prisma.musicUpdateInput
 ) {

@@ -7,6 +7,14 @@ export interface ICreateMusicRequestDTO {
     audio: File;
 }
 
+export interface IUpdateMusicRequestDTO {
+    title?: string;
+    genre?: string;
+    cover?: File;
+    is_premium?: 'true' | 'false';
+    delete_cover?: string;
+}
+
 export interface IMusic {
     id: number;
     name: string;
@@ -14,6 +22,15 @@ export interface IMusic {
     genre: string;
     uploadDate: Date;
     isPremium: boolean;
+}
+
+export interface IUpdateMusic {
+    title?: string;
+    genre?: string;
+    isPremium?: boolean;
+    coverBuff?: Buffer;
+    coverExt?: string;
+    deleteCover?: boolean;
 }
 
 export interface IMusicCover {
@@ -28,7 +45,7 @@ export interface IGetMusicPHPRespDTO {
         music_name: string;
         music_owner: string;
         music_genre: string;
-        music_upload_date: Date;
+        music_upload_date: string;
     };
 }
 
@@ -43,6 +60,17 @@ export interface IMusicSearchPHPRespDTO {
             music_upload_date: Date;
         }[];
         'page-count': number;
+    };
+}
+
+export interface ICreateMusicPHPRespDTO {
+    status: string;
+    data: {
+        music_id: number;
+        music_name: string;
+        music_owner: string;
+        music_genre: string;
+        music_upload_date: Date;
     };
 }
 
