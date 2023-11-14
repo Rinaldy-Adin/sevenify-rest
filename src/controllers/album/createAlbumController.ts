@@ -54,7 +54,7 @@ export default async function (
             title: album.album_name,
             owner_id: album.album_owner,
             is_premium: album.albums_premium,
-            music_id: [] //album.musicIds,
+            music_id: album.album_music_id,
         };
 
         return new httpResponse(res, {album: albumDTO}).json();

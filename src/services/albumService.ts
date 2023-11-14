@@ -32,7 +32,7 @@ export async function allAlbum(phpSessId: string, userId: number) {
             name: album.album_name,
             ownerId: album.album_owner,
             isPremium: true,
-            musicIds: [] // album.album_music?.map((music: any) => music.music_id) || [],
+            musicIds: album.album_music_id?.map((music: any) => music.music_id) || [],
         })
     );
 
@@ -76,7 +76,7 @@ export async function addNewAlbum(
                     user_id: ownerId,
                 },
             },
-            // album_music
+            // add album_music??
         });
 
         const promises = [];
@@ -127,7 +127,7 @@ export async function deleteAlbum(
             name: albumRecord.album_name,
             ownerId: albumRecord.album_owner,
             isPremium: true,
-            musicIds: [] //albumRecord.album_music.map((music) => music.music_id),
+            musicIds: albumRecord.album_music_id.map((music_id: number) => music_id),
         };
 
         const coverPaths = await glob(
