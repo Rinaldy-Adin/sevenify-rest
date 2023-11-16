@@ -14,6 +14,7 @@ import {
     getPendingUserById,
     getPendingUsers,
     getUserById,
+    getUsersByIdList,
     updateUser,
 } from '@/repositories/userRepository';
 import { logger } from '@/utils/logger';
@@ -124,4 +125,68 @@ export const pendingAdminAction = async (
     } else {
         await deleteUser(userId);
     }
+};
+
+export const userById = async (phpSessId: string, userId: number): Promise<IUserDAO> => {
+    const premiumUser = await getUserById(userId);
+
+    if (premiumUser)
+        return {
+            user_id: premiumUser.user_id,
+            role: premiumUser.role,
+            user_name: premiumUser.user_name,
+            user_premium: true
+        };
+
+        const phpUserResp = await phpClient.get<IUserPHPRespDTO>(
+            '/user/' + userId,
+            {
+                headers: {
+                    'Content-Type': ContentType.FORM_URLENCODED,
+                    Cookie: `PHPSESSID=${phpSessId}`,
+                },
+            }
+        );
+        const phpUserData = phpUserResp.data.data;
+
+    return {
+        user_id: parseInt(phpUserData.user_id),
+        role: phpUserData.role,
+        user_name: phpUserData.user_name,
+        user_premium: false,
+    };
+};
+
+export const usersByIdList = async (phpSessId: string, userIds: number[]) => {
+    const premiumUsers: IUserDAO[] = await getUsersByIdList(userIds);
+
+    const premiumUserIds = premiumUsers.map((user) => user.user_id);
+    const publicUserIds = userIds.filter((id) => !premiumUserIds.includes(id));
+
+    const promises = publicUserIds.map(
+        (id) =>
+            new Promise<IUserDAO>(async (resolve, reject) => {
+                const phpUserResp = await phpClient.get<IUserPHPRespDTO>(
+                    '/user/' + id,
+                    {
+                        headers: {
+                            'Content-Type': ContentType.FORM_URLENCODED,
+                            Cookie: `PHPSESSID=${phpSessId}`,
+                        },
+                    }
+                );
+                const phpUserData = phpUserResp.data.data;
+                const user: IUserDAO = {
+                    user_id: parseInt(phpUserData.user_id),
+                    role: phpUserData.role,
+                    user_name: phpUserData.user_name,
+                    user_premium: false,
+                };
+                resolve(user);
+            })
+    );
+
+    const publicUsers = await Promise.all(promises);
+
+    return [...premiumUsers, ...publicUsers];
 };
