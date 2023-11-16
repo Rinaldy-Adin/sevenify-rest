@@ -1,6 +1,7 @@
 import { Router } from "express";
 import authenticateToken from "../middlewares/authenticateToken";
 import getAllAlbumController from "@/controllers/album/getAllAlbumController";
+import getAlbumByIdController from "@/controllers/album/getAlbumByIdController";
 import {
     validateCreateAlbum,
     validateGetAlbumById,
@@ -31,5 +32,12 @@ export default function (app: Router) {
         authenticateToken(true, 'user', 'admin'),
         validateGetAlbumById,
         deleteAlbumByIdController
+    )
+
+    app.get(
+        '/album/:album_id',
+        authenticateToken(true, 'user', 'admin'),
+        validateGetAlbumById,
+        getAlbumByIdController
     )
 }

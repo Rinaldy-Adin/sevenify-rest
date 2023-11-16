@@ -15,7 +15,7 @@ import { StatusCodes } from "http-status-codes";
 import { promises as fs, readFileSync } from "fs";
 import path from "path";
 import { Blob } from "buffer";
-import { AxiosError } from "axios";
+import { AxiosError, all } from "axios";
 import { glob } from "glob";
 import * as FileType from "file-type";
 import {
@@ -27,6 +27,7 @@ import {
 import FormData from "form-data";
 import { ContentType } from "@/common/enums";
 import { error } from "console";
+import { get } from "http";
 
 export async function allAlbum(phpSessId: string, userId: number) {
     const premiumAlbums = await getAllAlbumByUserId(userId);
@@ -197,5 +198,77 @@ export async function deleteAlbum(
             if (error instanceof AppError) throw error;
             throw new AppError();
         }    
+    }
+}
+
+export async function albumById(
+    phpSessId: string,
+    userId: number,
+    albumId: number,
+    premium: boolean
+) {
+    if (premium) {
+        const albumRecord = await getAlbumById(albumId);
+
+        if (!albumRecord)
+            throw new AppError(
+                StatusCodes.BAD_REQUEST,
+                'Album does not exist'
+            );
+        
+        if (albumRecord.album_owner != userId)
+            throw new AppError(
+                StatusCodes.FORBIDDEN,
+                'You are not the owner of this album'
+            );
+        
+        const albumMusic = await getAllMusicByAlbumId(albumId);
+
+        const album: IAlbum = {
+            id: albumRecord.album_id,
+            name: albumRecord.album_name,
+            ownerId: albumRecord.album_owner,
+            isPremium: true,
+            music_id: albumMusic.map((music) => music.music_id),
+        };
+
+        return album;
+    } else {
+        try {
+            const phpAlbumResp = await phpClient.get<IGetAlbumPHPRespDTO>(`/album/${albumId}`, 
+            {
+                headers: {
+                    Cookie: `PHPSESSID=${phpSessId}`,
+                },
+            }
+            );
+
+            const phpAlbumData = phpAlbumResp.data.data[0];
+
+            const album: IAlbum = {
+                id: phpAlbumData.album_id,
+                name: phpAlbumData.album_name,
+                ownerId: phpAlbumData.album_owner_id,
+                isPremium: false,
+                music_id: phpAlbumData.album_music_id,
+            };
+
+            if (album.ownerId != userId)
+                throw new AppError(
+                    StatusCodes.BAD_REQUEST,
+                    'You are not the owner of this album'
+                );
+
+            return album;
+        } catch (error) {
+            if (error instanceof AxiosError && error.response?.status == 400)
+                throw new AppError(
+                    StatusCodes.BAD_REQUEST,
+                    'Album does not exist'
+                );
+            
+            if (error instanceof AppError) throw error;
+            throw new AppError();
+        }
     }
 }
