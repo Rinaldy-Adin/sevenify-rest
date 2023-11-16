@@ -13,7 +13,7 @@ export default async function (
 ) {
     if (!req.user) throw new AppError(StatusCodes.UNAUTHORIZED);
     try {
-        const { title, music_id }: ICreateAlbumRequestDTO = req.body;
+        const { title}: ICreateAlbumRequestDTO = req.body;
 
         const files = req.files as {
             [fieldname: string]: Express.Multer.File[];
@@ -36,16 +36,14 @@ export default async function (
                 title,
                 req.user.id,
                 cover.buffer,
-                coverExt,
-                music_id
+                coverExt
             );
         }else {
             album = await addNewAlbum(
                 title,
                 req.user.id,
                 null,
-                null,
-                music_id
+                null
             );
         }
 

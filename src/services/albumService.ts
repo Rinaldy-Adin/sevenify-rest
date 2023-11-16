@@ -6,6 +6,7 @@ import {
     getAlbumById,
     getAllAlbum,
     getAllAlbumByUserId,
+    getAllMusicByAlbumId
 } from "@/repositories/albumRepository";
 import { getUserById } from "@/repositories/userRepository";
 import { logger } from "@/utils/logger";
@@ -26,16 +27,21 @@ import FormData from "form-data";
 import { ContentType } from "@/common/enums";
 
 export async function allAlbum(phpSessId: string, userId: number) {
-    const premiumAlbum: IAlbum[] = (await getAllAlbumByUserId(userId)).map(
-        (album) => ({
+    const premiumAlbums = await getAllAlbumByUserId(userId);
+
+    const premiumAlbumsWithMusic = await Promise.all(premiumAlbums.map(async (album) => {
+        const musicData = await getAllMusicByAlbumId(album.album_id);
+        const music_id = musicData.map((music) => music.music_id);
+        return {
             id: album.album_id,
             name: album.album_name,
             ownerId: album.album_owner,
             isPremium: true,
-            music_id: album.album_music_id?.map((music: any) => music.music_id) || [],
-        })
-    );
-
+            music_id: music_id,
+        };
+    }
+    ));
+    
     const publicAlbumResp = await phpClient.get<IAlbumSearchPHPRespDTO>(
         "/search-user",
         {
@@ -58,7 +64,7 @@ export async function allAlbum(phpSessId: string, userId: number) {
         })
     );
 
-    return [...premiumAlbum, ...publicAlbum];
+    return [...premiumAlbumsWithMusic, ...publicAlbum];
 }
 
 export async function addNewAlbum(
@@ -66,7 +72,7 @@ export async function addNewAlbum(
     ownerId: number,
     coverBuff: Buffer | null,
     coverExt: string | null,
-    music_id: number[]
+    //music_id: number[]
 ){
     try {
         const albumRecord = await createAlbum({
@@ -76,7 +82,6 @@ export async function addNewAlbum(
                     user_id: ownerId,
                 },
             },
-            // add album_music??
         });
 
         const promises = [];

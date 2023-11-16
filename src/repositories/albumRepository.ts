@@ -43,3 +43,11 @@ export async function deleteAlbumById(albumId: number) {
         },
     });
 }
+
+export async function getAllMusicByAlbumId(albumId: number) {
+    return await prisma.album_music.findMany({
+        where: {
+            album_id: albumId,
+        },
+    });
+}
