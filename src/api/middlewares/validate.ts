@@ -109,9 +109,7 @@ export const validateCreateAlbum = validateBody(
         body: z.object({
             title: z
                 .string({ required_error: 'title required' })
-                .min(1, { message: 'title cannot be empty' }),
-            genre: z.string().nullish(),
-        }),
+                .min(1, { message: 'title cannot be empty' }),        }),
     })
 );
 
