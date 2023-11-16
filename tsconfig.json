@@ -14,10 +14,11 @@
         "paths": {
             "@/*": ["./src/*"]
         },
-        "typeRoots": [
-            "./node_modules/@types/**/index.d.ts",
-            "./src/common/interfaces"
-        ],
+        // "typeRoots": [
+        //     "./node_modules/**/*.d.ts",
+        //     "./src/common/interfaces",
+        // ],
+        "skipLibCheck": true,
         "moduleResolution": "Node",
         "allowSyntheticDefaultImports": true,
         "forceConsistentCasingInFileNames": true,

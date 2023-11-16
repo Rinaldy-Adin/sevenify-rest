@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import AppError from '@/common/AppError';
 import { StatusCodes } from 'http-status-codes';
 
-export function validateBody(schema: AnyZodObject) {
+export function validateRequest(schema: AnyZodObject) {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
             await schema.parseAsync({
@@ -22,17 +22,7 @@ export function validateBody(schema: AnyZodObject) {
     };
 }
 
-export const validatePendingAction = validateBody(
-    z.object({
-        body: z.object({
-            action: z.enum(['accept', 'reject'], {
-                required_error: 'action required',
-            }),
-        }),
-    })
-);
-
-export const validateCreateMusic = validateBody(
+export const validateCreateMusic = validateRequest(
     z.object({
         body: z.object({
             title: z
@@ -43,7 +33,7 @@ export const validateCreateMusic = validateBody(
     })
 );
 
-export const validateGetMusicById = validateBody(
+export const validateGetMusicById = validateRequest(
     z.object({
         params: z.object({
             music_id: z
@@ -60,7 +50,7 @@ export const validateGetMusicById = validateBody(
     })
 );
 
-export const validateUpdateMusicById = validateBody(
+export const validateUpdateMusicById = validateRequest(
     z.object({
         params: z.object({
             music_id: z
@@ -85,21 +75,19 @@ export const validateUpdateMusicById = validateBody(
     })
 );
 
-const validatePerusahaanBody = validateBody(
+export const validatePendingAction = validateRequest(
     z.object({
+        params: z.object({
+            follower_id: z
+                .string({ required_error: 'Follower id required' })
+                .refine((data) => Number.isInteger(Number(data)), {
+                    message: 'Follower id must be an integer',
+                }),
+        }),
         body: z.object({
-            nama: z
-                .string({ required_error: 'nama required' })
-                .min(1, { message: 'nama cannot be empty' }),
-            alamat: z
-                .string({ required_error: 'alamat required' })
-                .min(1, { message: 'alamat cannot be empty' }),
-            no_telp: z
-                .string({ required_error: 'no_telp required' })
-                .min(1, { message: 'no_telp cannot be empty' }),
-            kode: z
-                .string({ required_error: 'kode required' })
-                .min(1, { message: 'kode cannot be empty' }),
+            action: z.enum(['accept', 'reject'], {
+                required_error: 'Action required',
+            }),
         }),
     })
 );

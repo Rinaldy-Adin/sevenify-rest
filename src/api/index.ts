@@ -4,6 +4,7 @@ import authRoutes from './routes/authRoutes';
 import adminRoutes from './routes/adminRoutes';
 import musicRoutes from './routes/musicRoutes';
 import albumRoutes from './routes/albumRoutes';
+import followRoutes from './routes/followRoutes';
 
 export default function loadRoutes(app: Application): void {
     const routes = Router();
@@ -12,6 +13,7 @@ export default function loadRoutes(app: Application): void {
     adminRoutes(routes);
     musicRoutes(routes);
     albumRoutes(routes);
+    followRoutes(routes);
 
     app.use('/api', routes);
     handleErrors(app);

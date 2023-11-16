@@ -1,12 +1,23 @@
 import prisma from '@/prisma';
 import { logger } from '@/utils/logger';
 import { Prisma } from '@prisma/client';
+import { P } from 'pino';
 
 export async function getUserById(userId: number) {
     return await prisma.users.findUnique({
         where: {
             user_id: userId,
         },
+    });
+}
+
+export async function getUsersByIdList(ids: number[]) {
+    return await prisma.users.findMany({
+        where: {
+            user_id: {
+                in: ids
+            }
+        }
     });
 }
 
