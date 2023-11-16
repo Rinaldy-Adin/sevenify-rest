@@ -37,6 +37,30 @@ export async function updateAlbumById(albumId: number, data: Prisma.albumsUpdate
 }
 
 export async function deleteAlbumById(albumId: number) {
+    const album = await prisma.albums.findUnique({
+        where: {
+            album_id: albumId,
+        },
+        include: {
+            album_music: true,
+        },
+    });
+
+    if (!album) throw new Error('Album not found');
+
+    await Promise.all(
+        album.album_music.map(async (item) => {
+            await prisma.album_music.delete({
+                where: {
+                    music_id_album_id: {
+                        album_id: item.album_id,
+                        music_id: item.music_id,
+                    }
+                },
+            });
+        })
+    );
+
     return await prisma.albums.delete({
         where: {
             album_id: albumId,
