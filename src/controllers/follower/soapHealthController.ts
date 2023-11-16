@@ -3,6 +3,7 @@ import { IMusicResponseDTO } from '@/common/interfaces/IMusic';
 import { soaphealth } from '@/services/followerService';
 import { musicById } from '@/services/musicService';
 import httpResponse from '@/utils/httpResponse';
+import { logger } from '@/utils/logger';
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 

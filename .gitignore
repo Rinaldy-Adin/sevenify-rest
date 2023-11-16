@@ -3,3 +3,5 @@
 /storage/audio/*
 /storage/covers/music/*
 /storage/covers/albums/*
+/dist
+/mysql
