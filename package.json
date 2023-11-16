@@ -15,6 +15,7 @@
     "@types/module-alias": "^2.0.3",
     "@types/multer": "^1.4.10",
     "@types/node": "^20.8.10",
+    "@types/soap": "^0.21.0",
     "nodemon": "^3.0.1",
     "prisma": "^5.5.2",
     "ts-node": "^10.9.1",
@@ -38,6 +39,7 @@
     "multer": "^1.4.5-lts.1",
     "pino": "^8.16.1",
     "pino-http": "^8.5.1",
+    "pino-pretty": "^10.2.3",
     "soap": "^1.0.0",
     "zod": "^3.22.4"
   }
