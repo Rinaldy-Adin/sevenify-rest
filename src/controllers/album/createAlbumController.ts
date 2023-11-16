@@ -53,7 +53,7 @@ export default async function (
             id: album.album_id,
             title: album.album_name,
             owner_id: album.album_owner,
-            is_premium: false,
+            is_premium: true,
             music_id: [],
         };
 

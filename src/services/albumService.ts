@@ -89,7 +89,7 @@ export async function addNewAlbum(
         if (coverBuff){
             const coverPath = path.resolve(
                 __dirname,
-                '../../storage/covers/album',
+                '../../storage/covers/albums',
                 `${albumRecord.album_id}.${coverExt}`
             );
             promises.push(fs.writeFile(coverPath, coverBuff));
