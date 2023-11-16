@@ -47,12 +47,10 @@ export interface IAlbumResponseDTO {
 export interface IGetAlbumPHPRespDTO {
     status: string;
     data: {
-        album_id: number;
+        album_id: string;
         album_name: string;
-        album_owner_id: number;
-        album_music_id: number[];
-    }[];
-    'page-count': number;
+        album_owner: string;
+    };
 }
 
 export interface IAlbumSearchPHPRespDTO {
@@ -61,9 +59,20 @@ export interface IAlbumSearchPHPRespDTO {
         result: {
             album_id: number;
             album_name: string;
+            album_owner_name: string;
             album_owner_id: number;
-            album_music_id: number[];
         }[];
         'page-count': number;
     };
 }
+
+export interface IAlbumMusicPHPRespDTO {
+    status: string;
+    data: {
+        music_id: number;
+        music_name: string;
+        music_owner: string;
+        music_genre: string;
+        music_upload_date: Date;
+    }[];
+};

@@ -92,7 +92,7 @@ export const validatePendingAction = validateRequest(
     })
 );
 
-export const validateCreateAlbum = validateBody(
+export const validateCreateAlbum = validateRequest(
     z.object({
         body: z.object({
             title: z
@@ -101,7 +101,7 @@ export const validateCreateAlbum = validateBody(
     })
 );
 
-export const validateGetAlbumById = validateBody(
+export const validateGetAlbumById = validateRequest(
     z.object({
         params: z.object({
             album_id: z

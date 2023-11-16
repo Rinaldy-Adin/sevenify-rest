@@ -14,9 +14,6 @@ export default async function (
     if (!req.user) throw new AppError(StatusCodes.UNAUTHORIZED);
     try {
         const { title, music_id }: ICreateAlbumRequestDTO = req.body;
-        //logger.info(JSON.stringify(req.body, null, 4))
-        //logger.info(title)
-        //logger.info(JSON.stringify(music_id, null, 4))
         const music_id_numbers = music_id.map(Number);
         logger.info(music_id_numbers)
 

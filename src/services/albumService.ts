@@ -1,5 +1,5 @@
-import phpClient from "@/clients/phpClient";
-import AppError from "@/common/AppError";
+import phpClient from '@/clients/phpClient';
+import AppError from '@/common/AppError';
 import {
     createAlbum,
     deleteAlbumById,
@@ -7,46 +7,48 @@ import {
     getAllAlbum,
     getAllAlbumByUserId,
     getAllMusicByAlbumId,
-    createAlbumMusic
-} from "@/repositories/albumRepository";
-import { getUserById } from "@/repositories/userRepository";
-import { logger } from "@/utils/logger";
-import { StatusCodes } from "http-status-codes";
-import { promises as fs, readFileSync } from "fs";
-import path from "path";
-import { Blob } from "buffer";
-import { AxiosError, all } from "axios";
-import { glob } from "glob";
-import * as FileType from "file-type";
+    createAlbumMusic,
+} from '@/repositories/albumRepository';
+import { getUserById } from '@/repositories/userRepository';
+import { logger } from '@/utils/logger';
+import { StatusCodes } from 'http-status-codes';
+import { promises as fs, readFileSync } from 'fs';
+import path, { parse } from 'path';
+import { Blob } from 'buffer';
+import { AxiosError, all } from 'axios';
+import { glob } from 'glob';
+import * as FileType from 'file-type';
 import {
     ICreateAlbumRequestDTO,
     IAlbum,
     IAlbumSearchPHPRespDTO,
     IGetAlbumPHPRespDTO,
-} from "@/common/interfaces/IAlbum";
-import FormData from "form-data";
-import { ContentType } from "@/common/enums";
-import { error } from "console";
-import { get } from "http";
+    IAlbumMusicPHPRespDTO,
+} from '@/common/interfaces/IAlbum';
+import FormData from 'form-data';
+import { ContentType } from '@/common/enums';
+import { error } from 'console';
+import { get } from 'http';
 
 export async function allAlbum(phpSessId: string, userId: number) {
     const premiumAlbums = await getAllAlbumByUserId(userId);
 
-    const premiumAlbumsWithMusic = await Promise.all(premiumAlbums.map(async (album) => {
-        const musicData = await getAllMusicByAlbumId(album.album_id);
-        const music_id = musicData.map((music) => music.music_id);
-        return {
-            id: album.album_id,
-            name: album.album_name,
-            ownerId: album.album_owner,
-            isPremium: true,
-            music_id: music_id,
-        };
-    }
-    ));
-    
+    const premiumAlbumsWithMusic = await Promise.all(
+        premiumAlbums.map(async (album) => {
+            const musicData = await getAllMusicByAlbumId(album.album_id);
+            const music_id = musicData.map((music) => music.music_id);
+            return {
+                id: album.album_id,
+                name: album.album_name,
+                ownerId: album.album_owner,
+                isPremium: true,
+                music_id: music_id,
+            };
+        })
+    );
+
     const publicAlbumResp = await phpClient.get<IAlbumSearchPHPRespDTO>(
-        "/search-user",
+        '/search-album-user',
         {
             params: {
                 page: 0,
@@ -55,15 +57,26 @@ export async function allAlbum(phpSessId: string, userId: number) {
                 Cookie: `PHPSESSID=${phpSessId}`,
             },
         }
-    )
+    );
+    const publicAlbumData = publicAlbumResp.data.data.result;
 
-    const publicAlbum: IAlbum[] = publicAlbumResp.data.data.result.map(
-        (album: { album_id: number; album_name: string; album_owner_id: number; album_music_id: number[] }) => ({
-            id: album.album_id,
-            name: album.album_name,
-            ownerId: album.album_owner_id,
-            isPremium: false,
-            music_id: album.album_music_id
+    const publicAlbum: IAlbum[] = await Promise.all(
+        publicAlbumData.map(async (album) : Promise<IAlbum> => {
+            const albumMusicResp = await phpClient.get<IAlbumMusicPHPRespDTO>(
+                '/album-music/' + album.album_id,
+                {
+                    headers: {
+                        Cookie: `PHPSESSID=${phpSessId}`,
+                    },
+                }
+            );
+            return {
+                id: album.album_id,
+                name: album.album_name,
+                isPremium: false,
+                music_id: albumMusicResp.data.data.map((music) => music.music_id),
+                ownerId: album.album_owner_id
+            }
         })
     );
 
@@ -76,10 +89,10 @@ export async function addNewAlbum(
     coverBuff: Buffer | null,
     coverExt: string | null,
     music_id: number[]
-){
+) {
     try {
         const albumRecord = await createAlbum({
-            album_name: title, 
+            album_name: title,
             users: {
                 connect: {
                     user_id: ownerId,
@@ -88,7 +101,7 @@ export async function addNewAlbum(
         });
 
         const promises = [];
-        if (coverBuff){
+        if (coverBuff) {
             const coverPath = path.resolve(
                 __dirname,
                 '../../storage/covers/albums',
@@ -98,9 +111,9 @@ export async function addNewAlbum(
         }
 
         await Promise.all(promises);
-        
+
         if (music_id.length > 0) {
-            const albumMusicData = music_id.map(music_id => ({
+            const albumMusicData = music_id.map((music_id) => ({
                 album_id: albumRecord.album_id,
                 music_id,
             }));
@@ -122,21 +135,18 @@ export async function deleteAlbum(
     albumId: number,
     premium: boolean
 ) {
-    if(premium){
+    if (premium) {
         const albumRecord = await getAlbumById(albumId);
 
         if (!albumRecord)
-            throw new AppError(
-                StatusCodes.BAD_REQUEST, 
-                'Album does not exist'
-            );
+            throw new AppError(StatusCodes.BAD_REQUEST, 'Album does not exist');
 
         if (albumRecord.album_owner != userId)
             throw new AppError(
                 StatusCodes.FORBIDDEN,
                 'You are not the owner of this album'
             );
-        
+
         await deleteAlbumById(albumId);
 
         const album: IAlbum = {
@@ -148,10 +158,7 @@ export async function deleteAlbum(
         };
 
         const coverPaths = await glob(
-            path.join(
-                __dirname,
-                `../../storage/covers/album/${albumId}.*`
-            )
+            path.join(__dirname, `../../storage/covers/albums/${albumId}.*`)
         );
 
         if (coverPaths.length == 1) fs.unlink(coverPaths[0]);
@@ -167,14 +174,14 @@ export async function deleteAlbum(
                     },
                 }
             );
-            const phpAlbumData = phpAlbumResp.data.data[0];
+            const phpAlbumData = phpAlbumResp.data.data;
 
             const album: IAlbum = {
-                id: phpAlbumData.album_id,
+                id: parseInt(phpAlbumData.album_id),
                 name: phpAlbumData.album_name,
-                ownerId: phpAlbumData.album_owner_id,
+                ownerId: parseInt(phpAlbumData.album_owner),
                 isPremium: false,
-                music_id: phpAlbumData.album_music_id,
+                music_id: [],
             };
 
             if (album.ownerId != userId)
@@ -182,22 +189,25 @@ export async function deleteAlbum(
                     StatusCodes.BAD_REQUEST,
                     'You are not the owner of this album'
                 );
-            
-                await phpClient.delete(`/album/${albumId}`, {
-                    headers: {
-                        Cookie: `PHPSESSID=${phpSessId}`,
-                    },
-                });
+
+            await phpClient.delete(`/album/${albumId}`, {
+                headers: {
+                    Cookie: `PHPSESSID=${phpSessId}`,
+                },
+            });
+
+            return album;
         } catch (error) {
+            logger.error(error);
             if (error instanceof AxiosError && error.response?.status == 400)
                 throw new AppError(
                     StatusCodes.BAD_REQUEST,
                     'Album does not exist'
                 );
-            
+
             if (error instanceof AppError) throw error;
             throw new AppError();
-        }    
+        }
     }
 }
 
@@ -211,17 +221,14 @@ export async function albumById(
         const albumRecord = await getAlbumById(albumId);
 
         if (!albumRecord)
-            throw new AppError(
-                StatusCodes.BAD_REQUEST,
-                'Album does not exist'
-            );
-        
+            throw new AppError(StatusCodes.BAD_REQUEST, 'Album does not exist');
+
         if (albumRecord.album_owner != userId)
             throw new AppError(
                 StatusCodes.FORBIDDEN,
                 'You are not the owner of this album'
             );
-        
+
         const albumMusic = await getAllMusicByAlbumId(albumId);
 
         const album: IAlbum = {
@@ -235,22 +242,33 @@ export async function albumById(
         return album;
     } else {
         try {
-            const phpAlbumResp = await phpClient.get<IGetAlbumPHPRespDTO>(`/album/${albumId}`, 
-            {
-                headers: {
-                    Cookie: `PHPSESSID=${phpSessId}`,
-                },
-            }
+            const phpAlbumResp = await phpClient.get<IGetAlbumPHPRespDTO>(
+                `/album/${albumId}`,
+                {
+                    headers: {
+                        Cookie: `PHPSESSID=${phpSessId}`,
+                    },
+                }
             );
 
-            const phpAlbumData = phpAlbumResp.data.data[0];
+            const albumMusicResp = await phpClient.get<IAlbumMusicPHPRespDTO>(
+                '/album-music/' + albumId,
+                {
+                    headers: {
+                        Cookie: `PHPSESSID=${phpSessId}`,
+                    },
+                }
+            );
+
+            const phpAlbumData = phpAlbumResp.data.data;
+            const phpMusicData = albumMusicResp.data.data;
 
             const album: IAlbum = {
-                id: phpAlbumData.album_id,
+                id: parseInt(phpAlbumData.album_id),
                 name: phpAlbumData.album_name,
-                ownerId: phpAlbumData.album_owner_id,
+                ownerId: parseInt(phpAlbumData.album_owner),
                 isPremium: false,
-                music_id: phpAlbumData.album_music_id,
+                music_id: phpMusicData.map((music) => music.music_id),
             };
 
             if (album.ownerId != userId)
@@ -266,7 +284,7 @@ export async function albumById(
                     StatusCodes.BAD_REQUEST,
                     'Album does not exist'
                 );
-            
+
             if (error instanceof AppError) throw error;
             throw new AppError();
         }
