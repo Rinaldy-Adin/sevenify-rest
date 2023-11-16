@@ -15,6 +15,8 @@ const config = {
         level: process.env.LOG_LEVEL || 'debug',
     },
     phpUrl: process.env.PHP_URL || '',
+    soapUrl: process.env.SOAP_URL || '',
+    soapApiKey: process.env.SOAP_API_KEY || '',
 };
 
 export default config;

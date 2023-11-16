@@ -37,3 +37,7 @@ export interface IUserPHPRespDTO {
         role: 'admin' | 'user';
     };
 }
+
+export interface IPendingFollowerAction {
+    action: 'accept' | 'reject'
+}
