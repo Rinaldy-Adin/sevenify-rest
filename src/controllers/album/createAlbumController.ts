@@ -13,7 +13,7 @@ export default async function (
 ) {
     if (!req.user) throw new AppError(StatusCodes.UNAUTHORIZED);
     try {
-        const { title}: ICreateAlbumRequestDTO = req.body;
+        const { title }: ICreateAlbumRequestDTO = req.body;
 
         const files = req.files as {
             [fieldname: string]: Express.Multer.File[];
@@ -36,14 +36,16 @@ export default async function (
                 title,
                 req.user.id,
                 cover.buffer,
-                coverExt
+                coverExt,
+                []
             );
         }else {
             album = await addNewAlbum(
                 title,
                 req.user.id,
                 null,
-                null
+                null,
+                []
             );
         }
 
@@ -51,7 +53,7 @@ export default async function (
             id: album.album_id,
             title: album.album_name,
             owner_id: album.album_owner,
-            is_premium: album.albums_premium,
+            is_premium: false,
             music_id: [],
         };
 

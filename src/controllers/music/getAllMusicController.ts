@@ -2,6 +2,7 @@ import AppError from '@/common/AppError';
 import { IMusicResponseDTO } from '@/common/interfaces/IMusic';
 import { allMusic } from '@/services/musicService';
 import httpResponse from '@/utils/httpResponse';
+import { logger } from '@/utils/logger';
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
@@ -28,6 +29,7 @@ export default async function (
             return musicDTO;
         })).json();
     } catch (error) {
+        logger.error(error) 
         if (error instanceof AppError) {
             next(error);
         } else {

@@ -25,6 +25,7 @@ import {
 } from "@/common/interfaces/IAlbum";
 import FormData from "form-data";
 import { ContentType } from "@/common/enums";
+import { error } from "console";
 
 export async function allAlbum(phpSessId: string, userId: number) {
     const premiumAlbums = await getAllAlbumByUserId(userId);
@@ -72,7 +73,7 @@ export async function addNewAlbum(
     ownerId: number,
     coverBuff: Buffer | null,
     coverExt: string | null,
-    //music_id: number[]
+    music_id: number[]
 ){
     try {
         const albumRecord = await createAlbum({
@@ -81,7 +82,7 @@ export async function addNewAlbum(
                 connect: {
                     user_id: ownerId,
                 },
-            },
+            }
         });
 
         const promises = [];
@@ -132,7 +133,7 @@ export async function deleteAlbum(
             name: albumRecord.album_name,
             ownerId: albumRecord.album_owner,
             isPremium: true,
-            music_id: albumRecord.album_music_id.map((music_id: number) => music_id),
+            music_id: [],
         };
 
         const coverPaths = await glob(
