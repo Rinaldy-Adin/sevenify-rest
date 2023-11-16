@@ -6,7 +6,8 @@ import {
     getAlbumById,
     getAllAlbum,
     getAllAlbumByUserId,
-    getAllMusicByAlbumId
+    getAllMusicByAlbumId,
+    createAlbumMusic
 } from "@/repositories/albumRepository";
 import { getUserById } from "@/repositories/userRepository";
 import { logger } from "@/utils/logger";
@@ -82,7 +83,7 @@ export async function addNewAlbum(
                 connect: {
                     user_id: ownerId,
                 },
-            }
+            },
         });
 
         const promises = [];
@@ -96,6 +97,15 @@ export async function addNewAlbum(
         }
 
         await Promise.all(promises);
+        
+        if (music_id.length > 0) {
+            const albumMusicData = music_id.map(music_id => ({
+                album_id: albumRecord.album_id,
+                music_id,
+            }));
+
+            await createAlbumMusic(albumMusicData);
+        }
 
         return albumRecord;
     } catch (error) {

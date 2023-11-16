@@ -75,3 +75,9 @@ export async function getAllMusicByAlbumId(albumId: number) {
         },
     });
 }
+
+export async function createAlbumMusic(data: Prisma.album_musicCreateManyInput[]) {
+    return await prisma.album_music.createMany({
+        data,
+    });
+}
