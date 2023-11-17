@@ -4,11 +4,13 @@ import {default as httpLogger} from 'pino-http';
 import {logger} from '@/utils/logger';
 import loadRoutes from '@/api';
 import path from 'path';
+import cookieParser from 'cookie-parser';
 
 const createServer = (): express.Application => {
     const app = express();
 
     app.use(express.urlencoded({ extended: true }));
+    app.use(cookieParser());
     app.use(cors());
     app.use(express.json());
     app.use(httpLogger(logger))

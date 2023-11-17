@@ -10,7 +10,6 @@ import createMusicController from '@/controllers/music/createMusicController';
 import upload from '@/utils/multer';
 import getMusicByIdController from '@/controllers/music/getMusicByIdController';
 import deleteMusicByIdController from '@/controllers/music/deleteMusicByIdController';
-import getMusicCoverController from '@/controllers/music/getMusicCoverController';
 import updateMusicController from '@/controllers/music/updateMusicController';
 
 export default function (app: Router) {
@@ -36,13 +35,6 @@ export default function (app: Router) {
         authenticateToken(true, 'user', 'admin'),
         validateGetMusicById,
         getMusicByIdController
-    );
-
-    app.get(
-        '/cover/music/:music_id',
-        authenticateToken(true, 'user', 'admin'),
-        validateGetMusicById,
-        getMusicCoverController
     );
 
     app.patch(

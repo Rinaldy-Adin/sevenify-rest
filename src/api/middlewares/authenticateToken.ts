@@ -12,8 +12,7 @@ export default function authenticateToken(
 ) {
     return (req: Request, res: Response, next: NextFunction) => {
         {
-            const authHeader = req.headers['authorization'];
-            const token = authHeader?.split(' ')[1];
+            const token = req.cookies['accessToken'] ?? null;
 
             if (token == null) {
                 const err = new AppError(StatusCodes.UNAUTHORIZED);

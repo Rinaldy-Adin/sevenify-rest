@@ -13,7 +13,8 @@ export default async function (
     try {
         const { username, password }: IUserLoginReqDTO = req.body;
         const { user, token } = await signIn(username, password);
-        return new httpResponse(res, { user, token }).json();
+        res.cookie('accessToken', token, { httpOnly: true });
+        return new httpResponse(res, {user}).json();
     } catch (error) {
         if (error instanceof AppError) {
             next(error);
