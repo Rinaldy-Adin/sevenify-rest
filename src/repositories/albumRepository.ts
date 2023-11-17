@@ -27,7 +27,10 @@ export async function createAlbum(data: Prisma.albumsCreateInput) {
     });
 }
 
-export async function updateAlbumById(albumId: number, data: Prisma.albumsUpdateInput) {
+export async function updateAlbumById(
+    albumId: number,
+    data: Prisma.albumsUpdateInput
+) {
     return await prisma.albums.update({
         where: {
             album_id: albumId,
@@ -55,7 +58,7 @@ export async function deleteAlbumById(albumId: number) {
                     music_id_album_id: {
                         album_id: item.album_id,
                         music_id: item.music_id,
-                    }
+                    },
                 },
             });
         })
@@ -68,6 +71,15 @@ export async function deleteAlbumById(albumId: number) {
     });
 }
 
+export async function deleteAlbumMusicByAlbumId(albumId: number) {
+    return await prisma.album_music.deleteMany({
+        where: {
+            album_id: albumId,
+        },
+    });
+}
+
+
 export async function getAllMusicByAlbumId(albumId: number) {
     return await prisma.album_music.findMany({
         where: {
@@ -76,8 +88,11 @@ export async function getAllMusicByAlbumId(albumId: number) {
     });
 }
 
-export async function createAlbumMusic(data: Prisma.album_musicCreateManyInput[]) {
+export async function createAlbumMusic(
+    data: Prisma.album_musicCreateManyInput[]
+) {
     return await prisma.album_music.createMany({
         data,
     });
 }
+

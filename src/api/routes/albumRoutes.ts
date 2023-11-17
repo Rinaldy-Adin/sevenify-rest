@@ -5,10 +5,12 @@ import getAlbumByIdController from "@/controllers/album/getAlbumByIdController";
 import {
     validateCreateAlbum,
     validateGetAlbumById,
+    validateUpdateAlbumById,
 } from "../middlewares/validate";
 import createAlbumController from "@/controllers/album/createAlbumController";
 import deleteAlbumByIdController from "@/controllers/album/deleteAlbumByIdController";
 import upload from "@/utils/multer";
+import updateAlbumController from "@/controllers/album/updateAlbumController";
 
 export default function (app: Router) {
     app.get(
@@ -39,5 +41,15 @@ export default function (app: Router) {
         authenticateToken(true, 'user', 'admin'),
         validateGetAlbumById,
         getAlbumByIdController
+    )
+
+    app.patch(
+        '/album/:album_id',
+        authenticateToken(true, 'user', 'admin'),
+        upload.fields([
+            { name: 'cover', maxCount: 1 },
+        ]),
+        validateUpdateAlbumById,
+        updateAlbumController
     )
 }

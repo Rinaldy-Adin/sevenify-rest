@@ -6,10 +6,10 @@ export interface ICreateAlbumRequestDTO {
     music_id: number[];
 }
 
-export interface IUpdateMusicRequestDTO {
+export interface IUpdateAlbumRequestDTO {
     title?: string;
     cover?: File;
-    music_id?: number[];
+    music_id?: string[];
     is_premium?: 'true' | 'false';
     delete_cover?: string;
 }
