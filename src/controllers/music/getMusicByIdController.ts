@@ -1,6 +1,6 @@
 import AppError from '@/common/AppError';
 import { IMusicResponseDTO } from '@/common/interfaces/IMusic';
-import { allMusic, musicById } from '@/services/musicService';
+import { allMusic, getAudioExt, getMusicCoverExt, musicById } from '@/services/musicService';
 import httpResponse from '@/utils/httpResponse';
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
@@ -27,6 +27,8 @@ export default async function (
             owner_id: music.ownerId,
             upload_date: music.uploadDate,
             is_premium: music.isPremium,
+            cover_ext: await getMusicCoverExt(music.id),
+            audio_ext: await getAudioExt(music.id),
         };
 
         return new httpResponse(res, { music: musicDTO }).json();

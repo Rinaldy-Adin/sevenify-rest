@@ -3,7 +3,7 @@ import httpResponse from '@/utils/httpResponse';
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { IAlbumResponseDTO } from '@/common/interfaces/IAlbum';
-import { albumById } from '@/services/albumService';
+import { albumById, getAlbumCoverExt } from '@/services/albumService';
 
 export default async function (
     req: Request<{album_id: string}, {}, {}, { premium: 'true' | 'false' }>,
@@ -26,6 +26,7 @@ export default async function (
             owner_id: album.ownerId,
             is_premium: album.isPremium,
             music_id: album.music_id,
+            cover_ext: await getAlbumCoverExt(album.id),
         };
 
         return new httpResponse(res, {album: albumDTO}).json();

@@ -4,7 +4,7 @@ import {
     IMusicResponseDTO,
     IUpdateMusicRequestDTO,
 } from '@/common/interfaces/IMusic';
-import { addNewMusic, updateMusic } from '@/services/musicService';
+import { addNewMusic, getAudioExt, getMusicCoverExt, updateMusic } from '@/services/musicService';
 import httpResponse from '@/utils/httpResponse';
 import { logger } from '@/utils/logger';
 import { NextFunction, Request, Response } from 'express';
@@ -65,6 +65,8 @@ export default async function (
             owner_id: music.ownerId,
             upload_date: music.uploadDate,
             is_premium: music.isPremium,
+            cover_ext: await getMusicCoverExt(music.id),
+            audio_ext: await getAudioExt(music.id),
         };
 
         return new httpResponse(res, { music: musicDTO }).json();

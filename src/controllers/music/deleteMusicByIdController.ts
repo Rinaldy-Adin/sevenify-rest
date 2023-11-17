@@ -3,7 +3,7 @@ import httpResponse from '@/utils/httpResponse';
 import { NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
-import { deleteMusic } from '@/services/musicService';
+import { deleteMusic, getAudioExt, getMusicCoverExt } from '@/services/musicService';
 import { logger } from '@/utils/logger';
 import { IMusicResponseDTO } from '@/common/interfaces/IMusic';
 
@@ -30,6 +30,8 @@ export default async function (
             owner_id: music.ownerId,
             upload_date: music.uploadDate,
             is_premium: music.isPremium,
+            cover_ext: await getMusicCoverExt(music.id),
+            audio_ext: await getAudioExt(music.id),
         };
 
         return new httpResponse(res, { music: musicDTO }, 200, 'Successfully deleted music').json();

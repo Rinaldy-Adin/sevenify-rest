@@ -81,4 +81,6 @@ export interface IMusicResponseDTO {
     owner_id: number;
     upload_date: Date;
     is_premium: boolean;
+    cover_ext: string;
+    audio_ext: string;
 }

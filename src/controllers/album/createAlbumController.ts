@@ -1,6 +1,6 @@
 import AppError from '@/common/AppError';
 import { ICreateAlbumRequestDTO, IAlbumResponseDTO } from '@/common/interfaces/IAlbum';
-import { addNewAlbum } from '@/services/albumService';
+import { addNewAlbum, getAlbumCoverExt } from '@/services/albumService';
 import httpResponse from '@/utils/httpResponse';
 import { logger } from '@/utils/logger';
 import { NextFunction, Request, Response } from 'express';
@@ -57,6 +57,7 @@ export default async function (
             owner_id: album.album_owner,
             is_premium: true,
             music_id: music_id_numbers,
+            cover_ext: await getAlbumCoverExt(album.album_id),
         };
 
         return new httpResponse(res, {album: albumDTO}).json();

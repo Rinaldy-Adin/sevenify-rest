@@ -1,6 +1,9 @@
 import AppError from '@/common/AppError';
-import { IAlbumResponseDTO, IUpdateAlbumRequestDTO } from '@/common/interfaces/IAlbum';
-import { updateAlbum } from '@/services/albumService';
+import {
+    IAlbumResponseDTO,
+    IUpdateAlbumRequestDTO,
+} from '@/common/interfaces/IAlbum';
+import { getAlbumCoverExt, updateAlbum } from '@/services/albumService';
 import httpResponse from '@/utils/httpResponse';
 import { logger } from '@/utils/logger';
 import { NextFunction, Request, Response } from 'express';
@@ -12,7 +15,7 @@ export default async function (
     next: NextFunction
 ) {
     if (!req.user) throw new AppError(StatusCodes.UNAUTHORIZED);
-    logger.info('UPDATE')
+    logger.info('UPDATE');
     try {
         const {
             title,
@@ -57,12 +60,13 @@ export default async function (
             }
         );
 
-        const albumDTO : IAlbumResponseDTO = {
+        const albumDTO: IAlbumResponseDTO = {
             id: album.id,
             is_premium: album.isPremium,
             owner_id: album.ownerId,
             music_id: album.music_id,
-            title: album.name
+            title: album.name,
+            cover_ext: await getAlbumCoverExt(album.id),
         };
 
         return new httpResponse(res, { album: albumDTO }).json();

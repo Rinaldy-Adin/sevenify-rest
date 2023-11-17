@@ -262,57 +262,6 @@ export async function deleteMusic(
     }
 }
 
-export async function musicCoverBlob(
-    phpSessId: string,
-    musicId: number,
-    premium: boolean
-): Promise<IMusicCover> {
-    if (premium) {
-        const paths = await glob(
-            path.join(__dirname, `../../storage/covers/music/${musicId}.*`)
-        );
-        if (paths.length < 1)
-            throw new AppError(
-                StatusCodes.NOT_FOUND,
-                'Cover file doesnt exist'
-            );
-
-        const coverPath = paths[0];
-        const fileBuffer = await fs.readFile(coverPath);
-
-        return {
-            blob: new Blob([fileBuffer]),
-            ext: (await FileType.fromBuffer(fileBuffer))?.ext ?? '',
-        };
-    } else {
-        try {
-            const phpCoverArrayBuffer = await phpClient.get<ArrayBuffer>(
-                `/music-cover/${musicId}`,
-                {
-                    headers: {
-                        Cookie: `PHPSESSID=${phpSessId}`,
-                    },
-                    responseType: 'arraybuffer',
-                }
-            );
-            const fileBuffer = Buffer.from(phpCoverArrayBuffer.data);
-
-            return {
-                blob: new Blob([fileBuffer]),
-                ext: (await FileType.fromBuffer(fileBuffer))?.ext ?? '',
-            };
-        } catch (error) {
-            if (error instanceof AxiosError && error.response?.status == 400)
-                throw new AppError(
-                    StatusCodes.BAD_REQUEST,
-                    'Cover file does not exist'
-                );
-            if (error instanceof AppError) throw error;
-            throw new AppError();
-        }
-    }
-}
-
 export async function updateMusic(
     phpSessId: string,
     userId: number,
@@ -370,7 +319,11 @@ export async function updateMusic(
                 );
                 if (audioPaths.length == 1) {
                     const audioPath = audioPaths[0];
-                    formData.append('music-file', readFileSync(audioPath), 'name.m4a');
+                    formData.append(
+                        'music-file',
+                        readFileSync(audioPath),
+                        'name.m4a'
+                    );
                 }
 
                 const formHeaders = formData.getHeaders();
@@ -627,6 +580,27 @@ export async function updateMusic(
                 throw new AppError();
             }
         }
+    }
+}
+
+export async function getMusicCoverExt(musicId: number) {
+    const coverPaths = await glob(
+        path.join(__dirname, `../../storage/covers/music/${musicId}.*`)
+    );
+    if (coverPaths.length == 0) {
+        return '';
+    }
+    return coverPaths[0].split('.').pop() ?? '';
+}
+
+export async function getAudioExt(musicId: number) {
+    const coverPaths = await glob(
+        path.join(__dirname, `../../storage/audio/${musicId}.*`)
+    );
+    if (coverPaths.length == 0) {
+        return '';
+    } else {
+        return coverPaths[0].split('.').pop() ?? '';
     }
 }
 

@@ -3,7 +3,7 @@ import httpResponse from '@/utils/httpResponse';
 import { NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
-import { deleteAlbum } from '@/services/albumService';
+import { deleteAlbum, getAlbumCoverExt } from '@/services/albumService';
 import { logger } from '@/utils/logger';
 import { IAlbumResponseDTO } from '@/common/interfaces/IAlbum';
 
@@ -30,6 +30,7 @@ export default async function (
             owner_id: album.ownerId,
             is_premium: album.isPremium,
             music_id: album.music_id,
+            cover_ext: await getAlbumCoverExt(album.id),
         };
         return new httpResponse(res, {album: albumDTO}, 200, 'Successfully deleted album').json();
     } catch (error) {

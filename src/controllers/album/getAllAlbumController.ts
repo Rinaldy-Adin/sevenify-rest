@@ -1,6 +1,6 @@
 import AppError from '@/common/AppError';
 import { IAlbumResponseDTO } from '@/common/interfaces/IAlbum';
-import { allAlbum } from '@/services/albumService';
+import { allAlbum, getAlbumCoverExt } from '@/services/albumService';
 import httpResponse from '@/utils/httpResponse';
 import { logger } from '@/utils/logger';
 import { NextFunction, Request, Response } from 'express';
@@ -14,19 +14,23 @@ export default async function (
     if (!req.user) throw new AppError(StatusCodes.UNAUTHORIZED);
 
     try {
-        const album = await allAlbum(req.user?.phpSessId, req.user?.id);
+        const albums = await allAlbum(req.user?.phpSessId, req.user?.id);
+        const albumDTO: IAlbumResponseDTO[] = await Promise.all(
+            albums.map(async (item) => {
+                const albumDTO: IAlbumResponseDTO = {
+                    id: item.id,
+                    title: item.name,
+                    owner_id: item.ownerId,
+                    is_premium: item.isPremium,
+                    music_id: item.music_id,
+                    cover_ext: await getAlbumCoverExt(item.id),
+                };
 
-        return new httpResponse(res, album.map((item => {
-            const albumDTO: IAlbumResponseDTO = {
-                id: item.id,
-                title: item.name,
-                owner_id: item.ownerId,
-                is_premium: item.isPremium,
-                music_id: item.music_id,
-            }
+                return albumDTO;
+            })
+        );
 
-            return albumDTO;
-        }))).json();
+        return new httpResponse(res, { album: albumDTO }).json();
     } catch (error) {
         logger.error(error);
         if (error instanceof AppError) {

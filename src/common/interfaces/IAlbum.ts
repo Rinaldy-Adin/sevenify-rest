@@ -42,6 +42,7 @@ export interface IAlbumResponseDTO {
     owner_id: number;
     is_premium: boolean;
     music_id: number[];
+    cover_ext: string;
 }
 
 export interface IGetAlbumPHPRespDTO {

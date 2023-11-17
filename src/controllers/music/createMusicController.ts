@@ -1,6 +1,6 @@
 import AppError from '@/common/AppError';
 import { ICreateMusicRequestDTO, IMusicResponseDTO } from '@/common/interfaces/IMusic';
-import { addNewMusic } from '@/services/musicService';
+import { addNewMusic, getAudioExt, getMusicCoverExt } from '@/services/musicService';
 import httpResponse from '@/utils/httpResponse';
 import { logger } from '@/utils/logger';
 import { NextFunction, Request, Response } from 'express';
@@ -76,6 +76,8 @@ export default async function (
             owner_id: music.music_owner,
             upload_date: music.music_upload_date,
             is_premium: true,
+            cover_ext: await getMusicCoverExt(music.music_id),
+            audio_ext: await getAudioExt(music.music_id),
         };
 
         return new httpResponse(res, { music: musicDTO }).json();

@@ -29,9 +29,6 @@ import {
     IUpdateAlbum,
 } from '@/common/interfaces/IAlbum';
 import FormData from 'form-data';
-import { ContentType } from '@/common/enums';
-import { error } from 'console';
-import { get } from 'http';
 import { updateMusic } from './musicService';
 import { createMusic } from '@/repositories/musicRepository';
 
@@ -623,4 +620,14 @@ export async function updateAlbum(
             }
         }
     }
+}
+
+export async function getAlbumCoverExt(musicId: number) {
+    const coverPaths = await glob(
+        path.join(__dirname, `../../storage/covers/music/${musicId}.*`)
+    );
+    if (coverPaths.length == 0) {
+        return '';
+    }
+    return coverPaths[0].split('.').pop() ?? '';
 }

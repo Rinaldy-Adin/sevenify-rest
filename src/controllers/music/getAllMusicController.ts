@@ -1,6 +1,6 @@
 import AppError from '@/common/AppError';
-import { IMusicResponseDTO } from '@/common/interfaces/IMusic';
-import { allMusic } from '@/services/musicService';
+import { IMusic, IMusicResponseDTO } from '@/common/interfaces/IMusic';
+import { allMusic, getAudioExt, getMusicCoverExt } from '@/services/musicService';
 import httpResponse from '@/utils/httpResponse';
 import { logger } from '@/utils/logger';
 import { NextFunction, Request, Response } from 'express';
@@ -15,8 +15,7 @@ export default async function (
 
     try {
         const music = await allMusic(req.user?.phpSessId, req.user?.id);
-
-        return new httpResponse(res, music.map((item) => {
+        const musicDTO : IMusicResponseDTO[] = await Promise.all(music.map(async (item) => {
             const musicDTO: IMusicResponseDTO = {
                 id: item.id,
                 title: item.name,
@@ -24,10 +23,14 @@ export default async function (
                 owner_id: item.ownerId,
                 upload_date: item.uploadDate,
                 is_premium: item.isPremium,
+                cover_ext: await getMusicCoverExt(item.id),
+                audio_ext: await getAudioExt(item.id),
             }
 
             return musicDTO;
-        })).json();
+        }));
+
+        return new httpResponse(res, {music: musicDTO}).json();
     } catch (error) {
         logger.error(error) 
         if (error instanceof AppError) {
